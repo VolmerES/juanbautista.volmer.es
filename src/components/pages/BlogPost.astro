@@ -1,0 +1,106 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getLangFromUrl, useTranslations, useRoutes } from '../../i18n/ui';
+
+interface Props {
+    post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRoutes(lang);
+
+const { Content } = await post.render();
+const dateLocale = lang === 'es' ? 'es-ES' : 'en-GB';
+const minutes = Math.ceil(post.body.split(/\s+/).length / 200);
+---
+
+<main class="max-w-2xl mx-auto px-5 sm:px-8">
+    <article class="pt-12 sm:pt-16">
+        <a href={r.blog} class="inline-block font-mono text-[12px] text-pen hover:text-mark underline decoration-pen/30 underline-offset-4 transition-colors mb-10">
+            ← {t('cta.back')}
+        </a>
+
+        <header class="mb-10 pb-8 border-b border-rule">
+            <p class="font-mono text-[11px] text-pencil mb-3">
+                {post.data.pubDate.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}
+                <span class="mx-2 text-rule">|</span>
+                {minutes} {t('blog.readingTime')}
+            </p>
+
+            <h1 class="text-3xl sm:text-4xl font-bold leading-tight mb-4">{post.data.title}</h1>
+            <p class="text-lg text-ink-soft leading-relaxed">{post.data.description}</p>
+
+            {post.data.tags && post.data.tags.length > 0 && (
+                <ul class="flex flex-wrap gap-2 mt-5">
+                    {post.data.tags.map((tag: string) => (
+                        <li class="font-mono text-[10px] uppercase tracking-wider text-mark border border-mark/30 bg-mark-soft px-2 py-0.5">
+                            {tag}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </header>
+
+        {post.data.heroImage && (
+            <img
+                src={post.data.heroImage}
+                alt=""
+                class="w-full border border-rule mb-10"
+            />
+        )}
+
+        <div class="post-body">
+            <Content />
+        </div>
+    </article>
+</main>
+
+<style is:global>
+    @reference "../../styles/global.css";
+
+    .post-body {
+        @apply text-ink leading-[1.75];
+    }
+    .post-body h2 {
+        @apply text-2xl font-bold mt-12 mb-4;
+    }
+    .post-body h3 {
+        @apply text-xl font-bold mt-9 mb-3;
+    }
+    .post-body p {
+        @apply mb-5;
+    }
+    .post-body ul {
+        @apply list-disc pl-6 mb-5 space-y-1.5;
+    }
+    .post-body ol {
+        @apply list-decimal pl-6 mb-5 space-y-1.5;
+    }
+    .post-body a {
+        @apply text-pen underline decoration-pen/30 underline-offset-4 hover:decoration-pen transition-colors;
+    }
+    /* La cita va sobre el margen rojo del cuaderno. */
+    .post-body blockquote {
+        @apply border-l-2 border-mark pl-5 my-8 text-ink-soft italic;
+    }
+    .post-body pre {
+        @apply font-mono text-[13px] bg-paper-deep border border-rule p-4 overflow-x-auto mb-6 leading-relaxed;
+    }
+    .post-body code {
+        @apply font-mono text-[0.9em] bg-paper-deep border border-rule px-1 py-0.5;
+    }
+    .post-body pre code {
+        @apply bg-transparent border-0 p-0;
+    }
+    .post-body img {
+        @apply border border-rule my-8 w-full;
+    }
+    .post-body hr {
+        @apply border-rule my-10;
+    }
+    .post-body strong {
+        @apply font-bold text-ink;
+    }
+</style>

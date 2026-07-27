@@ -1,0 +1,50 @@
+---
+import { getLangFromUrl, useTranslations, useRoutes, getAlternateUrl, me } from '../i18n/ui';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRoutes(lang);
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const links = [
+    { href: r.home, label: t('nav.home') },
+    { href: r.cursus, label: t('nav.42') },
+    { href: r.projects, label: t('nav.projects') },
+    { href: r.blog, label: t('nav.blog') },
+];
+
+const isActive = (href: string) => {
+    const clean = href.replace(/\/$/, '') || '/';
+    return clean === '/' ? pathname === '/' : pathname.startsWith(clean);
+};
+---
+
+<header class="sticky top-0 z-50 bg-paper/90 backdrop-blur-sm border-b border-rule">
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between gap-4">
+        <a href={r.home} class="font-mono text-[13px] font-bold text-ink hover:text-mark transition-colors shrink-0">
+            jdelorme<span class="text-mark">/</span>
+        </a>
+
+        <nav class="flex items-center gap-1 overflow-x-auto" style="scrollbar-width: none;">
+            {links.map(({ href, label }) => (
+                <a
+                    href={href}
+                    class:list={[
+                        "font-mono text-[12px] px-2.5 py-1.5 whitespace-nowrap transition-colors border-b-2",
+                        isActive(href)
+                            ? "text-mark border-mark font-medium"
+                            : "text-ink-soft border-transparent hover:text-ink hover:border-rule"
+                    ]}
+                >
+                    {label}
+                </a>
+            ))}
+            <a
+                href={getAlternateUrl(Astro.url.pathname, lang)}
+                class="font-mono text-[12px] px-2.5 py-1.5 ml-1 text-pencil hover:text-pen transition-colors whitespace-nowrap"
+            >
+                {lang === 'es' ? 'EN' : 'ES'}
+            </a>
+        </nav>
+    </div>
+</header>

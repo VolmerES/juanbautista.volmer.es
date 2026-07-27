@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import BlogPost from '../../components/pages/BlogPost.astro';
+
+export async function getStaticPaths() {
+    const posts = await getCollection('blog');
+    return posts
+        .filter((post) => post.slug.startsWith('es/'))
+        .map((post) => ({
+            params: { slug: post.slug.replace(/^es\//, '') },
+            props: { post },
+        }));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout title={`${post.data.title} | Juan Delorme`} description={post.data.description}>
+    <BlogPost post={post} />
+</Layout>

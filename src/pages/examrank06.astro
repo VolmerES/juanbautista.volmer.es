@@ -1,0 +1,1399 @@
+---
+// Standalone page — no Layout, no header/footer, no navigation
+// Only accessible via direct link: volmer.es/examrank06
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Exam Rank 06 | Practice</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-main: #1e1e1e;
+            --bg-sidebar: #252526;
+            --bg-titlebar: #323233;
+            --bg-tab-active: #1e1e1e;
+            --bg-tab-inactive: #2d2d2d;
+            --bg-statusbar: #007acc;
+            --bg-input: #3c3c3c;
+            --text-main: #d4d4d4;
+            --text-dim: #858585;
+            --text-bright: #ffffff;
+            --accent: #007acc;
+            --accent-green: #4ec9b0;
+            --accent-orange: #ce9178;
+            --accent-red: #f44747;
+            --accent-yellow: #dcdcaa;
+            --border: #3c3c3c;
+            --scrollbar-bg: #1e1e1e;
+            --scrollbar-thumb: #424242;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+            background: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* ====== TITLE BAR ====== */
+        .titlebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-titlebar);
+            height: 36px;
+            padding: 0 16px;
+            border-bottom: 1px solid #1a1a1a;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .titlebar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .tl-red { background: #ff5f57; }
+        .tl-yellow { background: #febc2e; }
+        .tl-green { background: #28c840; }
+
+        .titlebar-title {
+            font-size: 12px;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+
+        .timer {
+            font-size: 13px;
+            color: var(--accent-green);
+            font-variant-numeric: tabular-nums;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-icon {
+            width: 14px;
+            height: 14px;
+            opacity: 0.8;
+        }
+
+        /* ====== TAB BAR ====== */
+        .tabbar {
+            display: flex;
+            align-items: stretch;
+            background: var(--bg-tab-inactive);
+            height: 35px;
+            border-bottom: 1px solid #1a1a1a;
+            flex-shrink: 0;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+            border-right: 1px solid #1a1a1a;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .tab.active {
+            background: var(--bg-tab-active);
+            color: var(--text-bright);
+            border-top: 2px solid var(--accent);
+        }
+
+        .tab:not(.active):hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .tab-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        /* ====== MAIN CONTENT ====== */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ====== SUBJECT PANEL ====== */
+        .subject-panel {
+            width: 420px;
+            min-width: 300px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: width 0.3s ease;
+        }
+
+        .subject-panel.collapsed {
+            width: 0;
+            min-width: 0;
+            border-right: none;
+        }
+
+        .subject-header {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .subject-toggle {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+        }
+
+        .subject-toggle:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-bright);
+        }
+
+        .subject-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .subject-section {
+            margin-bottom: 20px;
+        }
+
+        .subject-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .subject-section-title .arrow {
+            transition: transform 0.2s;
+            font-size: 10px;
+        }
+
+        .subject-section-title .arrow.open {
+            transform: rotate(90deg);
+        }
+
+        .subject-section-content {
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--text-main);
+        }
+
+        .subject-section-content.collapsed-section {
+            display: none;
+        }
+
+        .subject-section-content p {
+            margin-bottom: 8px;
+        }
+
+        .subject-section-content ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .subject-section-content ul li {
+            padding: 2px 0;
+            color: var(--text-dim);
+        }
+
+        .subject-section-content ul li::before {
+            content: '›';
+            color: var(--accent);
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .subject-code {
+            background: #1a1a1a;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 14px;
+            font-size: 11px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--text-main);
+            margin-top: 8px;
+        }
+
+        .subject-code .kw { color: #569cd6; }
+        .subject-code .type { color: #4ec9b0; }
+        .subject-code .str { color: #ce9178; }
+        .subject-code .num { color: #b5cea8; }
+        .subject-code .comment { color: #6a9955; }
+        .subject-code .fn { color: #dcdcaa; }
+        .subject-code .pp { color: #c586c0; }
+
+        /* ====== EDITOR AREA ====== */
+        .editor-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #editor-container {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ====== STATUS BAR ====== */
+        .statusbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-statusbar);
+            height: 28px;
+            padding: 0 12px;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .statusbar-left, .statusbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .statusbar-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.9;
+        }
+
+        /* ====== ACTION BUTTONS ====== */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-main);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-check {
+            background: #0e639c;
+            color: white;
+        }
+
+        .btn-check:hover {
+            background: #1177bb;
+            box-shadow: 0 0 12px rgba(14, 99, 156, 0.4);
+        }
+
+        .btn-solution {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .btn-solution:hover {
+            color: var(--text-bright);
+            border-color: var(--text-dim);
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            color: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        .btn-toggle-subject {
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            margin-left: auto;
+        }
+
+        .btn-toggle-subject:hover {
+            color: var(--text-bright);
+            border-color: var(--text-dim);
+        }
+
+        /* ====== RESULTS OVERLAY ====== */
+        .results-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .results-overlay.visible {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-card {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .results-title {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .results-title.pass { color: #4ec9b0; }
+        .results-title.fail { color: var(--accent-red); }
+
+        .results-score {
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .results-score.pass {
+            background: rgba(78, 201, 176, 0.15);
+            color: #4ec9b0;
+        }
+
+        .results-score.fail {
+            background: rgba(244, 71, 71, 0.15);
+            color: var(--accent-red);
+        }
+
+        .results-close {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .results-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-bright);
+        }
+
+        .results-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .diff-container {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .diff-line {
+            display: flex;
+            padding: 1px 16px;
+            white-space: pre;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .diff-line.match { background: transparent; color: var(--text-dim); }
+        .diff-line.added { background: rgba(78, 201, 176, 0.08); color: #4ec9b0; }
+        .diff-line.removed { background: rgba(244, 71, 71, 0.12); color: #f88; }
+
+        .diff-line-num {
+            width: 40px;
+            text-align: right;
+            padding-right: 12px;
+            color: var(--text-dim);
+            opacity: 0.5;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .diff-line-sign {
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .diff-line.added .diff-line-sign { color: #4ec9b0; }
+        .diff-line.removed .diff-line-sign { color: var(--accent-red); }
+
+        .diff-line-content {
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        /* ====== PASS ANIMATION ====== */
+        .pass-banner {
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .pass-banner .checkmark {
+            width: 80px;
+            height: 80px;
+            background: rgba(78, 201, 176, 0.15);
+            border: 3px solid #4ec9b0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .pass-banner .checkmark svg {
+            width: 40px;
+            height: 40px;
+            stroke: #4ec9b0;
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.6s 0.3s forwards;
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .pass-banner h2 {
+            font-size: 28px;
+            color: #4ec9b0;
+            margin-bottom: 8px;
+        }
+
+        .pass-banner p {
+            color: var(--text-dim);
+            font-size: 14px;
+        }
+
+        /* ====== LOADING ====== */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0a;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 768px) {
+            .subject-panel {
+                display: none;
+            }
+            .btn-toggle-subject {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Cargando editor...</div>
+    </div>
+
+    <!-- Title Bar -->
+    <div class="titlebar">
+        <div class="titlebar-left">
+            <div class="traffic-lights">
+                <div class="traffic-light tl-red"></div>
+                <div class="traffic-light tl-yellow"></div>
+                <div class="traffic-light tl-green"></div>
+            </div>
+            <span class="titlebar-title">EXAM RANK 06 — mini_serv</span>
+        </div>
+        <div class="timer" id="timer">
+            <svg class="timer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="timer-display">00:00:00</span>
+        </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tabbar">
+        <div class="tab active">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="#519aba" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            mini_serv.c
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Subject Panel -->
+        <div class="subject-panel" id="subject-panel">
+            <div class="subject-header">
+                <span>📋 Subject</span>
+            </div>
+            <div class="subject-body">
+                <!-- Assignment -->
+                <div class="subject-section">
+                    <div class="subject-section-title" onclick="toggleSection(this)">
+                        <span class="arrow open">▶</span> Assignment
+                    </div>
+                    <div class="subject-section-content">
+                        <p style="color: var(--accent-green); font-weight: 700; font-size: 14px; margin-bottom: 12px;">mini_serv</p>
+                        <p>Escribe un programa que funcione como un <strong style="color: var(--text-bright);">servidor de chat</strong> usando sockets TCP.</p>
+                        <p>El servidor debe:</p>
+                        <ul>
+                            <li>Aceptar conexiones de múltiples clientes</li>
+                            <li>Asignar un ID incremental a cada cliente</li>
+                            <li>Reenviar los mensajes de cada cliente a todos los demás</li>
+                            <li>Notificar cuando un cliente se conecta o desconecta</li>
+                            <li>Usar <code style="color: var(--accent-orange);">select()</code> para I/O multiplexing</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Allowed Functions -->
+                <div class="subject-section">
+                    <div class="subject-section-title" onclick="toggleSection(this)">
+                        <span class="arrow open">▶</span> Funciones permitidas
+                    </div>
+                    <div class="subject-section-content">
+                        <ul>
+                            <li>write, close, select</li>
+                            <li>socket, accept, listen, send, recv, bind</li>
+                            <li>strlen, strcpy, strcat, sprintf</li>
+                            <li>calloc, realloc, free, malloc</li>
+                            <li>bzero, htonl, htons, atoi</li>
+                            <li>exit</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Error Messages -->
+                <div class="subject-section">
+                    <div class="subject-section-title" onclick="toggleSection(this)">
+                        <span class="arrow open">▶</span> Mensajes requeridos
+                    </div>
+                    <div class="subject-section-content">
+                        <p><code style="color: var(--accent-orange);">"Wrong number of arguments\n"</code> → stderr, si argc != 2</p>
+                        <p><code style="color: var(--accent-orange);">"Fatal error\n"</code> → stderr, ante cualquier error fatal</p>
+                        <p><code style="color: var(--accent-orange);">"server: client X just arrived\n"</code> → al conectarse</p>
+                        <p><code style="color: var(--accent-orange);">"server: client X just left\n"</code> → al desconectarse</p>
+                        <p><code style="color: var(--accent-orange);">"client X: "&lt;msg&gt;</code> → al reenviar mensaje</p>
+                    </div>
+                </div>
+
+                <!-- Given Code: extract_message -->
+                <div class="subject-section">
+                    <div class="subject-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span onclick="toggleSection(this.parentElement)" style="cursor: pointer;"><span class="arrow open">▶</span> Código dado: extract_message</span>
+                        <button class="btn" style="padding: 2px 8px; font-size: 10px; background: var(--bg-editor);" onclick="insertSnippet('extract_message')">Insertar</button>
+                    </div>
+                    <div class="subject-section-content">
+                        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 6px;">Esta función extrae un mensaje completo terminado en '\n' del buffer de un cliente.</p>
+                        <pre class="subject-code"><span class="kw">int</span> <span class="fn">extract_message</span>(<span class="type">char</span> **buf, <span class="type">char</span> **msg)
+&#123;
+    <span class="type">char</span> *newbuf;
+    <span class="kw">int</span> i = <span class="num">0</span>;
+
+    *msg = <span class="num">0</span>;
+    <span class="kw">if</span> (!*buf)
+        <span class="kw">return</span> (<span class="num">0</span>);
+    <span class="kw">while</span> ((*buf)[i])
+    &#123;
+        <span class="kw">if</span> ((*buf)[i] == <span class="str">'\n'</span>)
+        &#123;
+            newbuf = <span class="fn">calloc</span>(<span class="num">1</span>, <span class="fn">strlen</span>(*buf + i + <span class="num">1</span>) + <span class="num">1</span>);
+            <span class="kw">if</span> (!newbuf)
+                <span class="kw">return</span> (<span class="num">-1</span>);
+            <span class="fn">strcpy</span>(newbuf, *buf + i + <span class="num">1</span>);
+            *msg = *buf;
+            (*msg)[i + <span class="num">1</span>] = <span class="num">0</span>;
+            *buf = newbuf;
+            <span class="kw">return</span> (<span class="num">1</span>);
+        &#125;
+        i++;
+    &#125;
+    <span class="kw">return</span> (<span class="num">0</span>);
+&#125;</pre>
+                    </div>
+                </div>
+
+                <!-- Given Code: str_join -->
+                <div class="subject-section">
+                    <div class="subject-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span onclick="toggleSection(this.parentElement)" style="cursor: pointer;"><span class="arrow open">▶</span> Código dado: str_join</span>
+                        <button class="btn" style="padding: 2px 8px; font-size: 10px; background: var(--bg-editor);" onclick="insertSnippet('str_join')">Insertar</button>
+                    </div>
+                    <div class="subject-section-content">
+                        <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 6px;">Concatena el buffer previo con lo recién leído.</p>
+                        <pre class="subject-code"><span class="type">char</span> *<span class="fn">str_join</span>(<span class="type">char</span> *buf, <span class="type">char</span> *add)
+&#123;
+    <span class="type">char</span> *newbuf;
+    <span class="kw">int</span> len = buf ? <span class="fn">strlen</span>(buf) : <span class="num">0</span>;
+
+    newbuf = <span class="fn">malloc</span>(len + <span class="fn">strlen</span>(add) + <span class="num">1</span>);
+    <span class="kw">if</span> (!newbuf)
+        <span class="kw">return</span> (<span class="num">0</span>);
+    newbuf[<span class="num">0</span>] = <span class="num">0</span>;
+    <span class="kw">if</span> (buf)
+        <span class="fn">strcat</span>(newbuf, buf);
+    <span class="fn">free</span>(buf);
+    <span class="fn">strcat</span>(newbuf, add);
+    <span class="kw">return</span> (newbuf);
+&#125;</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="editor-area">
+            <div id="editor-container"></div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <button class="btn btn-check" id="btn-check" onclick="checkSolution()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Comprobar
+        </button>
+        <!-- Solution Dropdown Content instead of simple button -->
+        <div class="dropdown">
+            <button class="btn btn-solution" id="btn-solution" onclick="toggleSolutionMenu(event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                Ver solución ▼
+            </button>
+            <div id="solution-menu" class="solution-dropdown hidden">
+                <style>
+                    .solution-item-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 8px; }
+                    .solution-item-row .solution-item { flex: 1; padding: 4px 8px; margin: 0; }
+                    .solution-item-row .btn-view { background: rgba(255,255,255,0.1); border: none; color: var(--text-main); padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.15s; font-size: 11px; }
+                    .solution-item-row .btn-view:hover { background: rgba(255,255,255,0.2); color: var(--text-bright); }
+                </style>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('includes', event)">Includes y globales</button>
+                    <button class="btn-view" onclick="viewSolutionPart('includes', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('fatal_error', event)">fatal_error</button>
+                    <button class="btn-view" onclick="viewSolutionPart('fatal_error', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('notify_other', event)">notify_other</button>
+                    <button class="btn-view" onclick="viewSolutionPart('notify_other', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('register_client', event)">register_client</button>
+                    <button class="btn-view" onclick="viewSolutionPart('register_client', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('remove_client', event)">remove_client</button>
+                    <button class="btn-view" onclick="viewSolutionPart('remove_client', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('send_msg', event)">send_msg</button>
+                    <button class="btn-view" onclick="viewSolutionPart('send_msg', event)">Ver</button>
+                </div>
+                <div class="solution-item-row">
+                    <button class="solution-item" onclick="showSolutionPart('main', event)">main</button>
+                    <button class="btn-view" onclick="viewSolutionPart('main', event)">Ver</button>
+                </div>
+                <div style="height: 1px; background: var(--border); margin: 4px 0;"></div>
+                <div class="solution-item-row">
+                    <button class="solution-item" style="color: var(--accent-red);" onclick="showSolutionPart('all', event)">Copiar todo (Sobrescribir)</button>
+                    <button class="btn-view" onclick="viewSolutionPart('all', event)">Ver todo</button>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-reset" onclick="resetEditor()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            Reset
+        </button>
+        <button class="btn btn-toggle-subject" onclick="toggleSubjectPanel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+            Panel
+        </button>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="statusbar">
+        <div class="statusbar-left">
+            <span class="statusbar-item">⚡ examrank06</span>
+            <span class="statusbar-item">C</span>
+        </div>
+        <div class="statusbar-right">
+            <span class="statusbar-item" id="cursor-pos">Ln 1, Col 1</span>
+            <span class="statusbar-item">UTF-8</span>
+            <span class="statusbar-item">LF</span>
+        </div>
+    </div>
+
+    <!-- Include CSS for the dropdown -->
+    <style>
+        .dropdown {
+            position: relative;
+        }
+        .solution-dropdown {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 0;
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            z-index: 100;
+            padding: 4px;
+        }
+        .solution-dropdown.hidden {
+            display: none;
+        }
+        .solution-item {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .solution-item:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-bright);
+        }
+    </style>
+
+    <!-- Results Overlay -->
+    <div class="results-overlay" id="results-overlay">
+        <div class="results-card">
+            <div class="results-header">
+                <div class="results-title" id="results-title"></div>
+                <button class="results-close" onclick="closeResults()">✕</button>
+            </div>
+            <div class="results-body" id="results-body"></div>
+        </div>
+    </div>
+
+    <!-- View Function Overlay -->
+    <div class="results-overlay" id="view-function-overlay">
+        <div class="results-card" style="max-width: 700px;">
+            <div class="results-header">
+                <div class="results-title" id="view-function-title" style="color: var(--accent);">Visualizar Función</div>
+                <button class="results-close" onclick="closeViewFunction()">✕</button>
+            </div>
+            <div class="results-body" style="padding: 16px;">
+                <pre class="subject-code" id="view-function-code" style="margin-top: 0;"></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Monaco Editor Loader -->
+    <script is:inline src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs/loader.js"></script>
+
+    <script is:inline>
+        const SOLUTION_BASE64 = `I2luY2x1ZGUgPHVuaXN0ZC5oPg0KI2luY2x1ZGUgPHN0cmluZy5oPg0KI2luY2x1ZGUgPHN0ZGxpYi5oPg0KI2luY2x1ZGUgPHN0ZGlvLmg+DQojaW5jbHVkZSA8c3lzL3NvY2tldC5oPg0KI2luY2x1ZGUgPG5ldGluZXQvaW4uaD4NCg0KaW50IGNvdW50LCBtYXhfZmQsIGlkc1s2NTUzNl07DQpjaGFyICptc2dzWzY1NTM2XSwgYnVmX3JlYWRbMTAwMV0sIGJ1Zl93cml0ZVs0Ml07DQpmZF9zZXQgcmZkcywgd2ZkcywgYWZkczsNCg0KaW50IGV4dHJhY3RfbWVzc2FnZShjaGFyICoqYnVmLCBjaGFyICoqbXNnKQ0Kew0KCWNoYXIgKm5ld2J1ZjsNCglpbnQgaSA9IDA7DQoNCgkqbXNnID0gMDsNCglpZiAoISpidWYpDQoJCXJldHVybiAoMCk7DQoJd2hpbGUgKCgqYnVmKVtpXSkNCgl7DQoJCWlmICgoKmJ1ZilbaV0gPT0gJ1xuJykNCgkJew0KCQkJbmV3YnVmID0gY2FsbG9jKDEsIHN0cmxlbigqYnVmICsgaSArIDEpICsgMSk7DQoJCQlpZiAoIW5ld2J1ZikNCgkJCQlyZXR1cm4gKC0xKTsNCgkJCXN0cmNweShuZXdidWYsICpidWYgKyBpICsgMSk7DQoJCQkqbXNnID0gKmJ1ZjsNCgkJCSgqbXNnKVtpICsgMV0gPSAwOw0KCQkJKmJ1ZiA9IG5ld2J1ZjsNCgkJCXJldHVybiAoMSk7DQoJCX0NCgkJaSsrOw0KCX0NCglyZXR1cm4gKDApOw0KfQ0KDQpjaGFyICpzdHJfam9pbihjaGFyICpidWYsIGNoYXIgKmFkZCkNCnsNCgljaGFyICpuZXdidWY7DQoJaW50IGxlbiA9IGJ1ZiA/IHN0cmxlbihidWYpIDogMDsNCg0KCW5ld2J1ZiA9IG1hbGxvYyhsZW4gKyBzdHJsZW4oYWRkKSArIDEpOw0KCWlmICghbmV3YnVmKQ0KCQlyZXR1cm4gKDApOw0KCW5ld2J1ZlswXSA9IDA7DQoJaWYgKGJ1ZikNCgkJc3RyY2F0KG5ld2J1ZiwgYnVmKTsNCglmcmVlKGJ1Zik7DQoJc3RyY2F0KG5ld2J1ZiwgYWRkKTsNCglyZXR1cm4gKG5ld2J1Zik7DQp9DQoNCnZvaWQgZmF0YWxfZXJyb3Iodm9pZCkNCnsNCgl3cml0ZSgyLCAiRmF0YWwgZXJyb3JcbiIsIDEyKTsNCglleGl0KDEpOw0KfQ0KDQp2b2lkIG5vdGlmeV9vdGhlcihpbnQgYXV0aG9yLCBjaGFyICpzdHIpDQp7DQoJZm9yIChpbnQgZmQgPSAwOyBmZCA8PSBtYXhfZmQ7IGZkKyspDQoJew0KCQlpZiAoRkRfSVNTRVQoZmQsICZ3ZmRzKSAmJiBmZCAhPSBhdXRob3IpDQoJCQlzZW5kKGZkLCBzdHIsIHN0cmxlbihzdHIpLCAwKTsNCgl9DQp9DQoNCnZvaWQgcmVnaXN0ZXJfY2xpZW50KGludCBmZCkNCnsNCglpZiAoZmQgPiBtYXhfZmQpDQoJCW1heF9mZCA9IGZkOw0KCWlkc1tmZF0gPSBjb3VudCsrOw0KCW1zZ3NbZmRdID0gMDsNCglGRF9TRVQoZmQsICZhZmRzKTsNCglzcHJpbnRmKGJ1Zl93cml0ZSwgInNlcnZlcjogY2xpZW50ICVkIGp1c3QgYXJyaXZlZFxuIiwgaWRzW2ZkXSk7DQoJbm90aWZ5X290aGVyKGZkLCBidWZfd3JpdGUpOw0KfQ0KDQp2b2lkIHJlbW92ZV9jbGllbnQoaW50IGZkKQ0Kew0KCXNwcmludGYoYnVmX3dyaXRlLCAic2VydmVyOiBjbGllbnQgJWQganVzdCBsZWZ0XG4iLCBpZHNbZmRdKTsNCglub3RpZnlfb3RoZXIoZmQsIGJ1Zl93cml0ZSk7DQoJZnJlZShtc2dzW2ZkXSk7DQoJRkRfQ0xSKGZkLCAmYWZkcyk7DQoJY2xvc2UoZmQpOw0KfQ0KDQp2b2lkIHNlbmRfbXNnKGludCBmZCkNCnsNCgljaGFyICptc2c7DQoNCgl3aGlsZSAoZXh0cmFjdF9tZXNzYWdlKCZtc2dzW2ZkXSwgJm1zZykpDQoJew0KCQlzcHJpbnRmKGJ1Zl93cml0ZSwgImNsaWVudCAlZDogIiwgaWRzW2ZkXSk7DQoJCW5vdGlmeV9vdGhlcihmZCwgYnVmX3dyaXRlKTsNCgkJub3RpZnlfb3RoZXIoZmQsIG1zZyk7DQoJCWZyZWUobXNnKTsNCgl9DQp9DQoNCmludCBtYWluKGludCBhYywgY2hhciAqKmF2KQ0Kew0KCXN0cnVjdCBzb2NrYWRkcl9pbiBzZXJ2Ow0KCWludCBzb2NrZmQsIGNsaWVudGZkLCBuOw0KCXNvY2tsZW5fdCBsZW47DQoNCglpZiAoYWMgIT0gMikNCgkJcmV0dXJuICh3cml0ZSgyLCAiV3JvbmcgbnVtYmVyIG9mIGFyZ3VtZW50c1xuIiwgMjYpLCAxKTsNCg0KCXNvY2tmZCA9IHNvY2tldChBRl9JTkVULCBTT0NLX1NUUkVBTSwgMCk7DQoJaWYgKHNvY2tmZCA8IDApDQoJCWZhdGFsX2Vycm9yKCk7DQoNCgltYXhfZmQgPSBzb2NrZmQ7DQoJRkRfWkVSTygmYWZkcyk7DQoJRkRfU0VUKHNvY2tmZCwgJmFmZHMpOw0KDQoJYnplcm8oJnNlcnYsIHNpemVvZihzZXJ2KSk7DQoJc2Vydi5zaW5fZmFtaWx5ID0gQUZfSU5FVDsNCglzZXJ2LnNpbl9hZGRyLnNfYWRkciA9IGh0b25sKDIxMzA3MDY0MzMpOw0KCXNlcnYuc2luX3BvcnQgPSBodG9ucyhhdG9pKGF2WzFdKSk7DQoNCglpZiAoYmluZChzb2NrZmQsIChjb25zdCBzdHJ1Y3Qgc29ja2FkZHIgKikmc2Vydiwgc2l6ZW9mKHNlcnYpKQ0KCQl8fCBsaXN0ZW4oc29ja2ZkLCBTT01BWENPTk4pKQ0KCQlmYXRhbF9lcnJvcigpOw0KDQoJd2hpbGUgKDEpDQoJew0KCQlyZmRzID0gd2ZkcyA9IGFmZHM7DQoNCgkJaWYgKHNlbGVjdChtYXhfZmQgKyAxLCAmcmZkcywgJndmZHMsIDAsIDApIDwgMCkNCgkJCWZhdGFsX2Vycm9yKCk7DQoNCgkJZm9yIChpbnQgZmQgPSAwOyBmZCA8PSBtYXhfZmQ7IGZkKyspDQoJCXsNCgkJCWlmICghRkRfSVNTRVQoZmQsICZyZmRzKSkNCgkJCQljb250aW51ZTsNCg0KCQkJaWYgKGZkID09IHNvY2tmZCkNCgkJCXsNCgkJCQlsZW4gPSBzaXplb2Yoc2Vydik7DQoJCQkJY2xpZW50ZmQgPSBhY2NlcHQoc29ja2ZkLCAoc3RydWN0IHNvY2thZGRyICopJnNlcnYsICZsZW4pOw0KCQkJCWlmIChjbGllbnRmZCA+PSAwKQ0KCQkJCXsNCgkJCQkJcmVnaXN0ZXJfY2xpZW50KGNsaWVudGZkKTsNCgkJCQkJYnJlYWs7DQoJCQkJfQ0KCQkJfQ0KCQkJZWxzZQ0KCQkJew0KCQkJCW4gPSByZWN2KGZkLCBidWZfcmVhZCwgMTAwMCwgMCk7DQoNCgkJCQlpZiAobiA8PSAwKQ0KCQkJCXsNCgkJCQkJcmVtb3ZlX2NsaWVudChmZCk7DQoJCQkJCWJyZWFrOw0KCQkJCX0NCg0KCQkJCWJ1Zl9yZWFkW25dID0gMDsNCg0KCQkJCW1zZ3NbZmRdID0gc3RyX2pvaW4obXNnc1tmZF0sIGJ1Zl9yZWFkKTsNCg0KCQkJCXNlbmRfbXNnKGZkKTsNCgkJCX0NCgkJfQ0KCX0NCn0=`;
+        const getSolutionCode = () => atob(SOLUTION_BASE64.replace(/\s+/g, ''));
+
+        let editor;
+        let startTime = Date.now();
+
+        // ====== TIMER ======
+        function updateTimer() {
+            const elapsed = Date.now() - startTime;
+            const h = String(Math.floor(elapsed / 3600000)).padStart(2, '0');
+            const m = String(Math.floor((elapsed % 3600000) / 60000)).padStart(2, '0');
+            const s = String(Math.floor((elapsed % 60000) / 1000)).padStart(2, '0');
+            document.getElementById('timer-display').textContent = `${h}:${m}:${s}`;
+        }
+        setInterval(updateTimer, 1000);
+
+        // ====== SECTION TOGGLES ======
+        function toggleSection(titleEl) {
+            const arrow = titleEl.querySelector('.arrow');
+            const content = titleEl.nextElementSibling;
+            if (content.classList.contains('collapsed-section')) {
+                content.classList.remove('collapsed-section');
+                arrow.classList.add('open');
+            } else {
+                content.classList.add('collapsed-section');
+                arrow.classList.remove('open');
+            }
+        }
+
+        // ====== SUBJECT PANEL TOGGLE ======
+        function toggleSubjectPanel() {
+            document.getElementById('subject-panel').classList.toggle('collapsed');
+            if (editor) editor.layout();
+        }
+
+        // ====== MONACO EDITOR INIT ======
+        require.config({
+            paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs' }
+        });
+
+        require(['vs/editor/editor.main'], function () {
+            // Register custom language features to colorize fd_set, sockaddr_in, socklen_t as types
+            monaco.languages.setMonarchTokensProvider('c', {
+                tokenizer: {
+                    root: [
+                        [/\b(fd_set|sockaddr_in|socklen_t)\b/, 'type.identifier'],
+                        [/^[ \t]*#include/, 'keyword.directive.include'],
+                        [/\b(int|char|void|struct)\b/, 'keyword'],
+                        [/\b(if|else|while|for|return|break|continue)\b/, 'keyword'],
+                        [/\b(sizeof)\b/, 'keyword'],
+                        [/[{}()\[\]]/, '@brackets'],
+                        [/[0-9]+/, 'number'],
+                        [/"([^"\\]|\\.)*$/, 'string.invalid'],
+                        [/"/, 'string', '@string'],
+                        [/'[^\\']'/, 'string'],
+                        [/'/, 'string.invalid'],
+                        [/\/\*/, 'comment', '@comment'],
+                        [/\/\/.*$/, 'comment']
+                    ],
+                    string: [
+                        [/[^\\"]+/, 'string'],
+                        [/\\./, 'string.escape.invalid'],
+                        [/"/, 'string', '@pop']
+                    ],
+                    comment: [
+                        [/[^\/*]+/, 'comment'],
+                        [/\*\//, 'comment', '@pop'],
+                        [/[\/*]/, 'comment']
+                    ]
+                }
+            });
+
+            // Add custom theme rule for 'type.identifier' to make it green
+            monaco.editor.defineTheme('custom-exam-dark', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: 'type.identifier', foreground: '4ec9b0' },
+                    { token: 'keyword.directive.include', foreground: 'c586c0' }
+                ],
+                colors: {}
+            });
+
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: '',
+                language: 'c',
+                theme: 'custom-exam-dark',
+                fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+                fontSize: 14,
+                lineHeight: 22,
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: true,
+                renderLineHighlight: 'all',
+                cursorBlinking: 'smooth',
+                cursorSmoothCaretAnimation: 'on',
+                smoothScrolling: true,
+                bracketPairColorization: { enabled: true },
+                guides: {
+                    bracketPairs: true,
+                    indentation: true,
+                },
+                padding: { top: 12, bottom: 12 },
+                // Disable autocomplete / intellisense
+                suggest: { enabled: false },
+                quickSuggestions: false,
+                parameterHints: { enabled: false },
+                wordBasedSuggestions: 'off',
+                suggestOnTriggerCharacters: false,
+                acceptSuggestionOnEnter: 'off',
+                tabCompletion: 'off',
+                inlineSuggest: { enabled: false },
+                // Keep useful features
+                autoClosingBrackets: 'always',
+                autoClosingQuotes: 'always',
+                autoIndent: 'full',
+                formatOnPaste: false,
+                formatOnType: false,
+            });
+
+            // Update cursor position in status bar
+            editor.onDidChangeCursorPosition(function (e) {
+                document.getElementById('cursor-pos').textContent =
+                    `Ln ${e.position.lineNumber}, Col ${e.position.column}`;
+            });
+
+            // Save to localStorage
+            const saved = localStorage.getItem('examrank06-code');
+            if (saved) {
+                editor.setValue(saved);
+            }
+
+            editor.onDidChangeModelContent(function () {
+                localStorage.setItem('examrank06-code', editor.getValue());
+            });
+
+            // Hide loading
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                editor.focus();
+            }, 500);
+        });
+
+        // ====== NORMALIZE CODE ======
+        function normalizeCode(code) {
+            let lines = code.split('\n');
+            let cleanLines = [];
+            
+            let inMultiLineComment = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                let originalLine = lines[i];
+                let lineNum = i + 1;
+                
+                // Handle multi-line comments
+                if (inMultiLineComment) {
+                    if (originalLine.includes('*/')) {
+                        inMultiLineComment = false;
+                        originalLine = originalLine.split('*/')[1] || '';
+                    } else {
+                        continue;
+                    }
+                }
+                if (originalLine.includes('/*')) {
+                    if (originalLine.includes('*/')) {
+                        originalLine = originalLine.replace(/\/\*[\s\S]*?\*\//g, '');
+                    } else {
+                        inMultiLineComment = true;
+                        originalLine = originalLine.split('/*')[0] || '';
+                    }
+                }
+
+                // Handle single-line comments
+                let lineParts = originalLine.split('//');
+                let line = lineParts[0];
+
+                line = line.replace(/\t/g, '    ').trim();
+                let normalizedText = line.replace(/\s+/g, ' ');
+                
+                if (normalizedText !== '') {
+                    cleanLines.push({ text: normalizedText, lineNum: lineNum, original: lines[i] });
+                }
+            }
+
+            // Group into blocks by tracking brace depth
+            let blocks = [];
+            let currentBlock = [];
+            let braceDepth = 0;
+
+            for (const line of cleanLines) {
+                currentBlock.push(line);
+                for (let j = 0; j < line.text.length; j++) {
+                    if (line.text[j] === '{') braceDepth++;
+                    if (line.text[j] === '}') braceDepth--;
+                }
+                
+                // Block ends when brace depth returns to 0 and line ends appropriately
+                if (braceDepth === 0 && (line.text.endsWith('}') || line.text.endsWith(';') || line.text.startsWith('#'))) {
+                    blocks.push(currentBlock);
+                    currentBlock = [];
+                }
+            }
+            if (currentBlock.length > 0) blocks.push(currentBlock);
+
+            // Sort blocks alphabetically by their first line allowing flexible function/include order
+            blocks.sort((a, b) => a[0].text.localeCompare(b[0].text));
+
+            return blocks.flat();
+        }
+
+        // ====== LCS DIFF ======
+        function lcs(a, b) {
+            const m = a.length, n = b.length;
+            const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (a[i - 1].text === b[j - 1].text) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            // Backtrack to find diff
+            const diff = [];
+            let i = m, j = n;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && a[i - 1].text === b[j - 1].text) {
+                    diff.unshift({ type: 'match', userItem: a[i - 1], solItem: b[j - 1] });
+                    i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                    diff.unshift({ type: 'added', solItem: b[j - 1] });
+                    j--;
+                } else {
+                    diff.unshift({ type: 'removed', userItem: a[i - 1] });
+                    i--;
+                }
+            }
+            return diff;
+        }
+
+        // ====== CHECK SOLUTION ======
+        function checkSolution() {
+            if (!editor) return;
+
+            const userCode = editor.getValue();
+            const solutionCode = getSolutionCode().trim();
+
+            const userNorm = normalizeCode(userCode);
+            const solNorm = normalizeCode(solutionCode);
+
+            // Check if they match
+            const isMatch = userNorm.length === solNorm.length &&
+                userNorm.every((line, i) => line.text === solNorm[i].text);
+
+            const overlay = document.getElementById('results-overlay');
+            const titleEl = document.getElementById('results-title');
+            const bodyEl = document.getElementById('results-body');
+
+            if (isMatch) {
+                // PASSED
+                titleEl.className = 'results-title pass';
+                titleEl.innerHTML = `
+                    <span class="results-score pass">100%</span>
+                    Resultado
+                `;
+                bodyEl.innerHTML = `
+                    <div class="pass-banner">
+                        <div class="checkmark">
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <h2>¡CORRECTO!</h2>
+                        <p>Tu código coincide con la solución esperada.</p>
+                    </div>
+                `;
+            } else {
+                // FAILED - show diff
+                const diff = lcs(userNorm, solNorm);
+                const matchCount = diff.filter(d => d.type === 'match').length;
+                const totalLines = Math.max(solNorm.length, 1);
+                const score = Math.round((matchCount / totalLines) * 100);
+
+                titleEl.className = score >= 80 ? 'results-title pass' : 'results-title fail';
+                titleEl.innerHTML = `
+                    <span class="results-score ${score >= 80 ? 'pass' : 'fail'}">${score}%</span>
+                    Diferencias encontradas
+                `;
+
+                let diffHTML = '<div class="diff-container">';
+                let lastLineNum = 0;
+                diff.forEach(d => {
+                    let lineStr = '';
+                    let lineNumStr = '';
+                    
+                    if (d.type === 'match' || d.type === 'removed') {
+                        lineStr = escapeHtml(d.userItem.original);
+                        lineNumStr = d.userItem.lineNum;
+                    } else if (d.type === 'added') {
+                        lineStr = escapeHtml(d.solItem.original);
+                        lineNumStr = 'Falta';
+                    }
+
+                    const sign = d.type === 'match' ? ' ' : d.type === 'added' ? '+' : '-';
+                    diffHTML += `
+                        <div class="diff-line ${d.type}">
+                            <span class="diff-line-num">${lineNumStr}</span>
+                            <span class="diff-line-sign">${sign}</span>
+                            <span class="diff-line-content">${lineStr}</span>
+                        </div>
+                    `;
+                });
+                diffHTML += '</div>';
+                bodyEl.innerHTML = diffHTML;
+            }
+
+            overlay.classList.add('visible');
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // ====== SHOW SOLUTION ======
+        function toggleSolutionMenu(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('solution-menu').classList.toggle('hidden');
+        }
+
+        // Hide menu if clicked outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown')) {
+                const menu = document.getElementById('solution-menu');
+                if (menu) menu.classList.add('hidden');
+            }
+        });
+
+        function showSolutionPart(part, e) {
+            if (e) e.stopPropagation();
+            if (!editor) return;
+            document.getElementById('solution-menu').classList.add('hidden');
+
+            const fullCode = getSolutionCode();
+            
+            if (part === 'all') {
+                if (confirm('¿Quieres SOBRESCRIBIR tu código con la solución completa?')) {
+                    editor.setValue(fullCode);
+                }
+                return;
+            }
+
+            let snippet = getSnippetForPart(part);
+
+            if (snippet) {
+                // Insert at cursor position instead of replacing entire file
+                const position = editor.getPosition();
+                editor.executeEdits("solution-insert", [{
+                    range: new monaco.Range(position.lineNumber, 1, position.lineNumber, 1),
+                    text: snippet + '\n'
+                }]);
+                editor.focus();
+            }
+        }
+
+        function viewSolutionPart(part, e) {
+            if (e) e.stopPropagation();
+            document.getElementById('solution-menu').classList.add('hidden');
+
+            let snippet = getSnippetForPart(part);
+            if (snippet) {
+                document.getElementById('view-function-title').innerText = part;
+                document.getElementById('view-function-code').innerText = snippet;
+                document.getElementById('view-function-overlay').classList.add('visible');
+            }
+        }
+
+        // Helper to get snippets
+        function getSnippetForPart(part) {
+            switch(part) {
+                case 'includes':
+                    return `#include <unistd.h>\n#include <string.h>\n#include <stdlib.h>\n#include <stdio.h>\n#include <sys/socket.h>\n#include <netinet/in.h>\n\nint count, max_fd, ids[65536];\nchar *msgs[65536], buf_read[1001], buf_write[42];\nfd_set rfds, wfds, afds;\n`;
+                case 'fatal_error':
+                    return `void fatal_error(void)\n{\n\twrite(2, "Fatal error\\n", 12);\n\texit(1);\n}\n`;
+                case 'notify_other':
+                    return `void notify_other(int author, char *str)\n{\n\tfor (int fd = 0; fd <= max_fd; fd++)\n\t{\n\t\tif (FD_ISSET(fd, &wfds) && fd != author)\n\t\t\tsend(fd, str, strlen(str), 0);\n\t}\n}\n`;
+                case 'register_client':
+                    return `void register_client(int fd)\n{\n\tif (fd > max_fd)\n\t\tmax_fd = fd;\n\tids[fd] = count++;\n\tmsgs[fd] = 0;\n\tFD_SET(fd, &afds);\n\tsprintf(buf_write, "server: client %d just arrived\\n", ids[fd]);\n\tnotify_other(fd, buf_write);\n}\n`;
+                case 'remove_client':
+                    return `void remove_client(int fd)\n{\n\tsprintf(buf_write, "server: client %d just left\\n", ids[fd]);\n\tnotify_other(fd, buf_write);\n\tfree(msgs[fd]);\n\tFD_CLR(fd, &afds);\n\tclose(fd);\n}\n`;
+                case 'send_msg':
+                    return `void send_msg(int fd)\n{\n\tchar *msg;\n\n\twhile (extract_message(&msgs[fd], &msg))\n\t{\n\t\tsprintf(buf_write, "client %d: ", ids[fd]);\n\t\tnotify_other(fd, buf_write);\n\t\tnotify_other(fd, msg);\n\t\tfree(msg);\n\t}\n}\n`;
+                case 'main':
+                    return `int main(int ac, char **av)\n{\n\tstruct sockaddr_in serv;\n\tint sockfd, clientfd, n;\n\tsocklen_t len;\n\n\tif (ac != 2)\n\t\treturn (write(2, "Wrong number of arguments\\n", 26), 1);\n\n\tsockfd = socket(AF_INET, SOCK_STREAM, 0);\n\tif (sockfd < 0)\n\t\tfatal_error();\n\n\tmax_fd = sockfd;\n\tFD_ZERO(&afds);\n\tFD_SET(sockfd, &afds);\n\n\tbzero(&serv, sizeof(serv));\n\tserv.sin_family = AF_INET;\n\tserv.sin_addr.s_addr = htonl(2130706433);\n\tserv.sin_port = htons(atoi(av[1]));\n\n\tif (bind(sockfd, (const struct sockaddr *)&serv, sizeof(serv))\n\t\t|| listen(sockfd, SOMAXCONN))\n\t\tfatal_error();\n\n\twhile (1)\n\t{\n\t\trfds = wfds = afds;\n\n\t\tif (select(max_fd + 1, &rfds, &wfds, 0, 0) < 0)\n\t\t\tfatal_error();\n\n\t\tfor (int fd = 0; fd <= max_fd; fd++)\n\t\t{\n\t\t\tif (!FD_ISSET(fd, &rfds))\n\t\t\t\tcontinue;\n\n\t\t\tif (fd == sockfd)\n\t\t\t{\n\t\t\t\tlen = sizeof(serv);\n\t\t\t\tclientfd = accept(sockfd, (struct sockaddr *)&serv, &len);\n\t\t\t\tif (clientfd >= 0)\n\t\t\t\t{\n\t\t\t\t\tregister_client(clientfd);\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\tn = recv(fd, buf_read, 1000, 0);\n\n\t\t\t\tif (n <= 0)\n\t\t\t\t{\n\t\t\t\t\tremove_client(fd);\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\tbuf_read[n] = 0;\n\n\t\t\t\tmsgs[fd] = str_join(msgs[fd], buf_read);\n\n\t\t\t\tsend_msg(fd);\n\t\t\t}\n\t\t}\n\t}\n}\n`;
+                case 'all':
+                    return getSolutionCode();
+            }
+            return '';
+        }
+
+        // ====== INSERT GIVEN SNIPPET ======
+        function insertSnippet(type) {
+            if (!editor) return;
+            let snippet = '';
+            if (type === 'extract_message') {
+                snippet = `int extract_message(char **buf, char **msg)\n{\n\tchar *newbuf;\n\tint i = 0;\n\n\t*msg = 0;\n\tif (!*buf)\n\t\treturn (0);\n\twhile ((*buf)[i])\n\t{\n\t\tif ((*buf)[i] == '\\n')\n\t\t{\n\t\t\tnewbuf = calloc(1, strlen(*buf + i + 1) + 1);\n\t\t\tif (!newbuf)\n\t\t\t\treturn (-1);\n\t\t\tstrcpy(newbuf, *buf + i + 1);\n\t\t\t*msg = *buf;\n\t\t\t(*msg)[i + 1] = 0;\n\t\t\t*buf = newbuf;\n\t\t\treturn (1);\n\t\t}\n\t\ti++;\n\t}\n\treturn (0);\n}\n`;
+            } else if (type === 'str_join') {
+                snippet = `char *str_join(char *buf, char *add)\n{\n\tchar *newbuf;\n\tint len = buf ? strlen(buf) : 0;\n\n\tnewbuf = malloc(len + strlen(add) + 1);\n\tif (!newbuf)\n\t\treturn (0);\n\tnewbuf[0] = 0;\n\tif (buf)\n\t\tstrcat(newbuf, buf);\n\tfree(buf);\n\tstrcat(newbuf, add);\n\treturn (newbuf);\n}\n`;
+            }
+
+            if (snippet) {
+                const position = editor.getPosition();
+                editor.executeEdits("snippet-insert", [{
+                    range: new monaco.Range(position.lineNumber, 1, position.lineNumber, 1),
+                    text: snippet + '\n'
+                }]);
+                editor.focus();
+            }
+        }
+
+        // ====== RESET ======
+        function resetEditor() {
+            if (!editor) return;
+            if (confirm('¿Estás seguro de que quieres borrar todo el código?')) {
+                editor.setValue('');
+                localStorage.removeItem('examrank06-code');
+                startTime = Date.now();
+            }
+        }
+
+        // ====== CLOSE RESULTS ======
+        function closeResults() {
+            document.getElementById('results-overlay').classList.remove('visible');
+        }
+
+        function closeViewFunction() {
+            document.getElementById('view-function-overlay').classList.remove('visible');
+        }
+
+        // Close results on Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeResults();
+                closeViewFunction();
+            }
+        });
+    </script>
+</body>
+</html>

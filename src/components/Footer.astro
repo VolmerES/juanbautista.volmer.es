@@ -1,0 +1,23 @@
+---
+import { getLangFromUrl, useTranslations, me } from '../i18n/ui';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-rule mt-24">
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row gap-6 sm:items-end justify-between">
+        <div>
+            <p class="font-mono text-[12px] text-pencil mb-2">© {year} {me.name}</p>
+            <p class="text-sm text-ink-soft max-w-xs leading-snug">{t('footer.note')}</p>
+        </div>
+
+        <nav class="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[12px]">
+            <a href={me.github} target="_blank" rel="noopener noreferrer" class="text-ink-soft hover:text-pen underline decoration-rule underline-offset-4 hover:decoration-pen transition-colors">GitHub</a>
+            <a href={me.linkedin} target="_blank" rel="noopener noreferrer" class="text-ink-soft hover:text-pen underline decoration-rule underline-offset-4 hover:decoration-pen transition-colors">LinkedIn</a>
+            <a href={me.intra} target="_blank" rel="noopener noreferrer" class="text-ink-soft hover:text-pen underline decoration-rule underline-offset-4 hover:decoration-pen transition-colors">42 intra</a>
+            <a href={me.studio} class="text-mark hover:text-ink underline decoration-mark/40 underline-offset-4 transition-colors">{t('footer.studio')} ↗</a>
+        </nav>
+    </div>
+</footer>

@@ -1,0 +1,145 @@
+---
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations, useRoutes, me } from '../../i18n/ui';
+import { cursusProjects } from '../../data/cursus';
+import GradeMark from '../GradeMark.astro';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRoutes(lang);
+
+const posts = (await getCollection('blog'))
+    .filter((p) => p.id.startsWith(`${lang}/`))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    .slice(0, 3);
+
+const dateLocale = lang === 'es' ? 'es-ES' : 'en-GB';
+
+// Los últimos evaluados, que son los que dicen dónde estoy ahora.
+const recent = cursusProjects.filter((p) => p.grade).slice(-4).reverse();
+
+const path = [
+    { year: t('home.p1.year'), title: t('home.p1.title'), desc: t('home.p1.desc') },
+    { year: t('home.p2.year'), title: t('home.p2.title'), desc: t('home.p2.desc') },
+    { year: t('home.p3.year'), title: t('home.p3.title'), desc: t('home.p3.desc') },
+];
+
+const labelRows = [
+    { key: t('label.name'), value: me.name },
+    { key: t('label.school'), value: me.school },
+    { key: t('label.subject'), value: t('home.subject') },
+    { key: t('label.course'), value: t('home.course') },
+];
+---
+
+<main class="max-w-5xl mx-auto px-5 sm:px-8">
+
+    <!-- ===== PORTADA: la etiqueta del cuaderno ===== -->
+    <section class="pt-14 sm:pt-24 pb-16">
+        <div class="label-box p-6 sm:p-8 max-w-xl mb-10">
+            <p class="font-mono text-[10px] tracking-[0.2em] text-pencil mb-5 uppercase">
+                {me.alias}
+            </p>
+            <dl class="space-y-2.5">
+                {labelRows.map(({ key, value }) => (
+                    <div class="flex items-baseline gap-3">
+                        <dt class="font-mono text-[10px] uppercase tracking-wider text-pencil w-20 shrink-0">
+                            {key}
+                        </dt>
+                        <dd class="flex-1 border-b border-dotted border-rule pb-0.5">
+                            <span class="text-[15px] sm:text-base text-ink font-medium">{value}</span>
+                        </dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
+
+        <p class="text-lg sm:text-xl leading-relaxed max-w-2xl text-ink mb-6">
+            {t('home.lead')}
+        </p>
+
+        <p class="text-sm text-ink-soft max-w-xl leading-relaxed">
+            {t('home.note')}{' '}
+            <a href={me.studio} class="text-pen underline decoration-pen/30 underline-offset-4 hover:decoration-pen transition-colors">
+                {t('home.studioLink')} ↗
+            </a>
+        </p>
+    </section>
+
+    <!-- ===== TRAYECTORIA ===== -->
+    <section class="py-14 border-t border-rule">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-10">
+            <span class="underline-mark">{t('home.pathTitle')}</span>
+        </h2>
+
+        <ol class="notebook-margin pl-6 sm:pl-8 space-y-9">
+            {path.map((step) => (
+                <li class="relative">
+                    <span class="absolute -left-6 sm:-left-8 top-1.5 w-2 h-2 rounded-full bg-mark"></span>
+                    <p class="font-mono text-[11px] uppercase tracking-wider text-mark mb-1.5">{step.year}</p>
+                    <h3 class="text-lg font-bold mb-1.5">{step.title}</h3>
+                    <p class="text-ink-soft leading-relaxed max-w-2xl">{step.desc}</p>
+                </li>
+            ))}
+        </ol>
+    </section>
+
+    <!-- ===== ÚLTIMOS PROYECTOS DEL CURSUS ===== -->
+    <section class="py-14 border-t border-rule">
+        <div class="flex items-baseline justify-between gap-4 mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold">
+                <span class="underline-mark">{t('home.projectsTitle')}</span>
+            </h2>
+            <a href={r.cursus} class="font-mono text-[12px] text-pen hover:text-mark underline decoration-pen/30 underline-offset-4 transition-colors shrink-0">
+                {t('cta.all')} →
+            </a>
+        </div>
+
+        <ul class="divide-y divide-rule border-y border-rule">
+            {recent.map((project) => (
+                <li class="py-4 flex items-start gap-5">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-base mb-1">{project.title}</h3>
+                        <p class="text-sm text-ink-soft leading-snug mb-2">{project.description[lang]}</p>
+                        <p class="font-mono text-[11px] text-pencil">{project.tech.join(' · ')}</p>
+                    </div>
+                    <GradeMark grade={project.grade} bonus={project.bonus} />
+                </li>
+            ))}
+        </ul>
+    </section>
+
+    <!-- ===== CUADERNO ===== -->
+    <section class="py-14 border-t border-rule">
+        <div class="flex items-baseline justify-between gap-4 mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold">
+                <span class="underline-mark">{t('home.blogTitle')}</span>
+            </h2>
+            {posts.length > 0 && (
+                <a href={r.blog} class="font-mono text-[12px] text-pen hover:text-mark underline decoration-pen/30 underline-offset-4 transition-colors shrink-0">
+                    {t('cta.all')} →
+                </a>
+            )}
+        </div>
+
+        {posts.length === 0 ? (
+            <p class="font-mono text-sm text-pencil">{t('home.blogEmpty')}</p>
+        ) : (
+            <ul class="space-y-6">
+                {posts.map((post) => (
+                    <li>
+                        <a href={`${r.blog}/${post.slug.replace(/^(es|en)\//, '')}/`} class="group block">
+                            <p class="font-mono text-[11px] text-pencil mb-1">
+                                {post.data.pubDate.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}
+                            </p>
+                            <h3 class="text-lg font-bold mb-1 group-hover:text-pen transition-colors">
+                                {post.data.title}
+                            </h3>
+                            <p class="text-sm text-ink-soft leading-snug max-w-2xl">{post.data.description}</p>
+                        </a>
+                    </li>
+                ))}
+            </ul>
+        )}
+    </section>
+</main>

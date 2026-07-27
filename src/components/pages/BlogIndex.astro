@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import { getLangFromUrl, useTranslations, useRoutes } from '../../i18n/ui';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const r = useRoutes(lang);
+
+const posts = (await getCollection('blog'))
+    .filter((p) => p.id.startsWith(`${lang}/`))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const dateLocale = lang === 'es' ? 'es-ES' : 'en-GB';
+---
+
+<main class="max-w-5xl mx-auto px-5 sm:px-8">
+
+    <section class="pt-14 sm:pt-20 pb-12">
+        <h1 class="text-4xl sm:text-5xl font-bold mb-6">
+            <span class="underline-mark">{t('blog.title')}</span>
+        </h1>
+        <p class="text-lg leading-relaxed max-w-2xl text-ink-soft">{t('blog.lead')}</p>
+    </section>
+
+    <section class="pb-10">
+        {posts.length === 0 ? (
+            <p class="font-mono text-sm text-pencil border-y border-rule py-8">{t('blog.empty')}</p>
+        ) : (
+            <ol class="border-t border-rule">
+                {posts.map((post) => (
+                    <li class="border-b border-rule">
+                        <a href={`${r.blog}/${post.slug.replace(/^(es|en)\//, '')}/`} class="group flex items-start gap-5 sm:gap-8 py-6">
+                            <div class="flex-1 min-w-0">
+                                <p class="font-mono text-[11px] text-pencil mb-1.5">
+                                    {post.data.pubDate.toLocaleDateString(dateLocale, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    <span class="mx-2 text-rule">|</span>
+                                    {Math.ceil(post.body.split(/\s+/).length / 200)} {t('blog.readingTime')}
+                                </p>
+                                <h2 class="text-xl sm:text-2xl font-bold mb-2 group-hover:text-pen transition-colors">
+                                    {post.data.title}
+                                </h2>
+                                <p class="text-ink-soft leading-relaxed max-w-2xl">{post.data.description}</p>
+                            </div>
+
+                            {post.data.heroImage && (
+                                <img
+                                    src={post.data.heroImage}
+                                    alt=""
+                                    loading="lazy"
+                                    class="hidden sm:block w-32 h-24 object-cover border border-rule shrink-0"
+                                />
+                            )}
+                        </a>
+                    </li>
+                ))}
+            </ol>
+        )}
+    </section>
+</main>

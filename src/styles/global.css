@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/**
+ * Sistema visual: cuaderno cuadriculado.
+ *
+ * La web comercial (volmer.es) es neón sobre negro. Esta es su opuesta a
+ * propósito: papel claro, tinta de bolígrafo y anotaciones en rojo, como el
+ * cuaderno de un estudiante. 42 es una escuela, así que el material de partida
+ * es el papel corregido, no la terminal.
+ */
+@theme {
+  /* Papel */
+  --color-paper: #fafbfc;
+  --color-paper-deep: #f1f4f8;
+  --color-grid: #e1e8f0;
+  --color-rule: #d5dde7;
+
+  /* Tintas */
+  --color-ink: #17233a; /* bolígrafo azul-negro, no negro puro */
+  --color-ink-soft: #55637d;
+  --color-pencil: #8a97ab;
+
+  /* Bolígrafo rojo del corrector: reservado para notas y aciertos */
+  --color-mark: #d63a2f;
+  --color-mark-soft: #fbeae8;
+
+  /* Bolígrafo azul: enlaces y subrayados */
+  --color-pen: #2c5fbf;
+
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* La cuadrícula de 24px es el fondo del sitio entero. */
+body {
+  background-color: var(--color-paper);
+  background-image: linear-gradient(
+      var(--color-grid) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+::selection {
+  background: var(--color-mark);
+  color: var(--color-paper);
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--color-mark);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/**
+ * El margen rojo del cuaderno. Recorre la página a la izquierda y es la línea
+ * sobre la que se apoyan las notas de los proyectos.
+ */
+.notebook-margin {
+  position: relative;
+}
+.notebook-margin::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--color-mark) 35%, transparent);
+}
+
+/* Subrayado hecho a mano: dos trazos ligeramente desalineados. */
+.underline-mark {
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-mark) 45%, transparent),
+    color-mix(in srgb, var(--color-mark) 45%, transparent)
+  );
+  background-repeat: no-repeat;
+  background-position: 0 92%;
+  background-size: 100% 2px;
+  padding-bottom: 1px;
+}
+
+/* Etiqueta de cuaderno: el rectángulo impreso de la portada. */
+.label-box {
+  border: 1.5px solid var(--color-ink);
+  background: var(--color-paper);
+  box-shadow: 3px 3px 0 var(--color-rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
