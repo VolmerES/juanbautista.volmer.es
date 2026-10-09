@@ -1,12 +1,18 @@
 export const defaultLang = "es";
 
 export const me = {
-  name: "Juan Delorme Pinedo",
+  name: "Juan Bautista Delorme Pinedo",
   alias: "Volmer",
   school: "42 Madrid",
   intra: "https://profile.intra.42.fr/users/jdelorme",
   github: "https://github.com/VolmerES",
   linkedin: "https://linkedin.com/in/jdelorme",
+  /**
+   * Clasificación WURI, donde 42 es 3.ª en 2025 y 2026. La captura de
+   * public/wuri-2026.webp sale de la página 2 del PDF de 2026.
+   */
+  wuriRanking: "https://wuri-world.circle.so/wuri-ranking",
+  wuriPdf: "https://drive.google.com/file/d/18wRtS_m5B-3mL-xZ4jff2AFMz1XNYXz2/view",
   /** Web comercial: el otro lado de la separación. */
   studio: "https://volmer.es",
 };
@@ -20,30 +26,21 @@ export const ui = {
 
     "label.name": "Nombre",
     "label.school": "Escuela",
-    "label.course": "Curso",
+    "label.role": "Oficio",
     "label.subject": "Asignatura",
 
-    "home.course": "2024 — presente",
+    "home.role": "Desarrollador de software",
     "home.subject": "Arquitectura de software",
+    "home.wuri": "3.ª universidad más innovadora del mundo",
+    "home.wuriSource": "ranking WURI, 2025 y 2026",
     "home.lead":
-      "Estudiante de 42 Madrid. Aprendo escribiendo cosas desde cero: un shell de Unix, un servidor IRC, un motor 3D. Esta es la libreta donde lo voy apuntando.",
+      "Desarrollador de software formado en 42 Madrid. Hago webs y apps a medida en Volmer Studio y software embebido para robótica. Y, por gusto, todo lo que cabe en esta libreta: un shell de Unix, un servidor IRC, un motor 3D.",
     "home.note":
-      "Trabajo por cuenta propia en Volmer Studio, pero eso es otra web. Aquí solo hay lo que hago por gusto.",
+      "El trabajo para clientes está en Volmer Studio, que es otra web. Aquí está lo que hago por mi cuenta y lo que aprendí en 42.",
     "home.studioLink": "Ver mi trabajo profesional",
 
-    "home.pathTitle": "Cómo llegué aquí",
-    "home.p1.year": "Adolescencia",
-    "home.p1.title": "Un ASUS y mucho tiempo libre",
-    "home.p1.desc":
-      "Scripts y juegos sencillos en Unity con C#. Nadie me lo mandó; simplemente quería ver qué pasaba si tocaba esto.",
-    "home.p2.year": "La piscina",
-    "home.p2.title": "Cuatro semanas de 42",
-    "home.p2.desc":
-      "El proceso de selección de 42: un mes programando en C sin profesores, corrigiéndonos entre nosotros. Salí dentro.",
-    "home.p3.year": "El cursus",
-    "home.p3.title": "Construir desde cero",
-    "home.p3.desc":
-      "Sin librerías, sin frameworks, sin atajos. Cada proyecto obliga a entender la capa de abajo antes de poder seguir.",
+    "home.pathTitle": "Trayectoria",
+    "home.pathLead": "Del ASUS heredado a hoy: trabajo, formación y lo que he ido publicando, en orden.",
 
     "home.projectsTitle": "Lo último que he hecho",
     "home.blogTitle": "Últimas anotaciones",
@@ -55,8 +52,10 @@ export const ui = {
 
     "42.title": "El cursus",
     "42.lead":
-      "42 no tiene profesores ni clases. Te dan un enunciado y te las apañas. Cada proyecto lo corrigen otros estudiantes a mano, y la nota sale de ahí.",
+      "42 no tiene profesores ni clases. Te dan un enunciado y te las apañas. Cada proyecto lo corrigen otros estudiantes a mano, y la nota sale de ahí. Y el método funciona: el ranking WURI la sitúa como la 3.ª universidad más innovadora del mundo en 2025 y en 2026, por delante de Stanford y el MIT.",
     "42.bonusNote": "Con bonus",
+    "42.wuriCaption": "Recorte de la clasificación oficial WURI 2026. 42, tercera; el MIT, quinto; Stanford, séptima.",
+    "42.wuriLink": "Ver la clasificación oficial",
     "42.noRepo": "Sin repositorio público",
 
     "projects.title": "Proyectos propios",
@@ -84,30 +83,21 @@ export const ui = {
 
     "label.name": "Name",
     "label.school": "School",
-    "label.course": "Year",
+    "label.role": "Trade",
     "label.subject": "Subject",
 
-    "home.course": "2024 — present",
+    "home.role": "Software developer",
     "home.subject": "Software architecture",
+    "home.wuri": "World's 3rd most innovative university",
+    "home.wuriSource": "WURI ranking, 2025 and 2026",
     "home.lead":
-      "Student at 42 Madrid. I learn by writing things from scratch: a Unix shell, an IRC server, a 3D engine. This is the notebook where I keep track of it.",
+      "Software developer trained at 42 Madrid. I build custom websites and apps at Volmer Studio and embedded software for robotics. And, for fun, everything that fits in this notebook: a Unix shell, an IRC server, a 3D engine.",
     "home.note":
-      "I also freelance as Volmer Studio, but that's a different site. This one is only the things I do for fun.",
+      "Client work lives at Volmer Studio, which is a different site. This one is what I build on my own and what I learned at 42.",
     "home.studioLink": "See my professional work",
 
-    "home.pathTitle": "How I got here",
-    "home.p1.year": "Teens",
-    "home.p1.title": "An ASUS and a lot of free time",
-    "home.p1.desc":
-      "Scripts and simple games in Unity with C#. Nobody assigned it; I just wanted to see what happened if I poked at it.",
-    "home.p2.year": "The pool",
-    "home.p2.title": "Four weeks of 42",
-    "home.p2.desc":
-      "42's selection process: a month writing C with no teachers, grading each other. I made it through.",
-    "home.p3.year": "The cursus",
-    "home.p3.title": "Building from scratch",
-    "home.p3.desc":
-      "No libraries, no frameworks, no shortcuts. Every project makes you understand the layer underneath before you can move on.",
+    "home.pathTitle": "My path",
+    "home.pathLead": "From a hand-me-down ASUS to today: work, training and what I have shipped, in order.",
 
     "home.projectsTitle": "Most recent work",
     "home.blogTitle": "Latest notes",
@@ -119,8 +109,10 @@ export const ui = {
 
     "42.title": "The cursus",
     "42.lead":
-      "42 has no teachers and no lectures. You get a brief and you work it out. Every project is graded by hand by other students, and that's where the mark comes from.",
+      "42 has no teachers and no lectures. You get a brief and you work it out. Every project is graded by hand by other students, and that's where the mark comes from. And the method works: the WURI ranking places it as the world's 3rd most innovative university in 2025 and 2026, ahead of Stanford and MIT.",
     "42.bonusNote": "With bonus",
+    "42.wuriCaption": "Clipping from the official WURI 2026 ranking. 42 third; MIT fifth; Stanford seventh.",
+    "42.wuriLink": "See the official ranking",
     "42.noRepo": "No public repository",
 
     "projects.title": "Personal projects",

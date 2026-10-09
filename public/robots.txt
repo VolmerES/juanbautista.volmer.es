@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /examrank06
 
-Sitemap: https://juanbautista.volmer.es/sitemap-index.xml
+Sitemap: https://juandelorme-portfolio.volmer.es/sitemap-index.xml

@@ -30,7 +30,9 @@ const isActive = (href: string) => {
                 <a
                     href={href}
                     class:list={[
-                        "font-mono text-[12px] px-2.5 py-1.5 whitespace-nowrap transition-colors border-b-2",
+                        "font-mono text-[12px] px-2 sm:px-2.5 py-1.5 whitespace-nowrap transition-colors border-b-2",
+                        // En móvil no cabe todo: a la portada ya se vuelve desde el logo.
+                        href === r.home && "hidden sm:inline-block",
                         isActive(href)
                             ? "text-mark border-mark font-medium"
                             : "text-ink-soft border-transparent hover:text-ink hover:border-rule"
@@ -40,8 +42,16 @@ const isActive = (href: string) => {
                 </a>
             ))}
             <a
+                href="/Juan_Bautista_CV.pdf"
+                target="_blank"
+                rel="noopener"
+                class="font-mono text-[12px] px-2 sm:px-2.5 py-1.5 whitespace-nowrap text-ink-soft border-b-2 border-transparent hover:text-ink hover:border-rule transition-colors"
+            >
+                CV
+            </a>
+            <a
                 href={getAlternateUrl(Astro.url.pathname, lang)}
-                class="font-mono text-[12px] px-2.5 py-1.5 ml-1 text-pencil hover:text-pen transition-colors whitespace-nowrap"
+                class="font-mono text-[12px] px-2 sm:px-2.5 py-1.5 sm:ml-1 text-pencil hover:text-pen transition-colors whitespace-nowrap"
             >
                 {lang === 'es' ? 'EN' : 'ES'}
             </a>

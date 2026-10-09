@@ -1,5 +1,5 @@
 ---
-import { getLangFromUrl, useTranslations } from '../../i18n/ui';
+import { getLangFromUrl, useTranslations, me } from '../../i18n/ui';
 import { cursusProjects } from '../../data/cursus';
 import GradeMark from '../GradeMark.astro';
 
@@ -18,6 +18,31 @@ const graded = cursusProjects.filter((p) => p.grade !== null).length;
         <p class="text-lg leading-relaxed max-w-2xl text-ink-soft mb-8">
             {t('42.lead')}
         </p>
+        <!-- Recorte del ranking, pegado con cinta como en un cuaderno -->
+        <figure id="wuri" class="relative max-w-2xl mb-10 rotate-[-0.6deg]">
+            <span aria-hidden="true" class="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-mark-soft/90 border border-mark/15 rotate-[2deg]"></span>
+            <a href={me.wuriPdf} target="_blank" rel="noopener noreferrer" class="block bg-white p-2 sm:p-3 border border-rule shadow-[0_6px_18px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-shadow">
+                <!-- En móvil, solo la columna de los puestos 1-12: la tabla entera no se lee -->
+                <picture>
+                    <source media="(max-width: 640px)" srcset="/wuri-2026-movil.webp" width="1034" height="725" />
+                <img
+                    src="/wuri-2026.webp"
+                    width="1786"
+                    height="728"
+                    loading="lazy"
+                    alt="WURI 2026: Global Top 500 Innovative Universities. 1 Minerva University, 2 Arizona State University, 3 École 42, 4 University of Pennsylvania, 5 MIT, 7 Stanford, 12 Harvard."
+                    class="w-full h-auto"
+                />
+                </picture>
+            </a>
+            <figcaption class="mt-3 font-mono text-[11px] text-pencil leading-relaxed">
+                {t('42.wuriCaption')}
+                <a href={me.wuriRanking} target="_blank" rel="noopener noreferrer" class="text-pen underline decoration-pen/30 underline-offset-4 hover:decoration-pen transition-colors whitespace-nowrap">
+                    {t('42.wuriLink')} ↗
+                </a>
+            </figcaption>
+        </figure>
+
         <p class="font-mono text-[12px] text-pencil">
             {graded}/{cursusProjects.length} {lang === 'es' ? 'evaluados' : 'graded'}
         </p>

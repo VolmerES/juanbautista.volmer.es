@@ -14,10 +14,11 @@ const lang = getLangFromUrl(Astro.url);
 const { title, description, noindex = false } = Astro.props;
 
 const defaultDescription = lang === 'es'
-    ? 'El cuaderno de Juan Delorme: estudiante de 42 Madrid. Proyectos en C y C++, apps propias y notas sobre lo que voy aprendiendo.'
-    : "Juan Delorme's notebook: student at 42 Madrid. C and C++ projects, personal apps and notes on what I'm learning.";
+    ? 'El cuaderno de Juan Bautista Delorme Pinedo, desarrollador de software formado en 42 Madrid: proyectos en C y C++, apps propias y notas sobre lo que voy aprendiendo.'
+    : "The notebook of Juan Bautista Delorme Pinedo, a software developer trained at 42 Madrid: C and C++ projects, personal apps and notes on what I'm learning.";
 
-const site = 'https://juanbautista.volmer.es';
+// Sale de `site` en astro.config.mjs, para que el dominio esté en un solo sitio.
+const site = Astro.site!.origin;
 const pathname = Astro.url.pathname;
 const canonical = site + pathname;
 const alternatePath = getAlternateUrl(pathname, lang);
