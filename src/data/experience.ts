@@ -114,7 +114,21 @@ export const milestones: Milestone[] = [
     },
   },
   {
+    // Fecha sacada del primer commit en los repos de PROETI (02-06-2026).
+    period: { es: 'Desde junio 2026', en: 'Since June 2026' },
+    kind: 'work',
+    title: { es: 'Desarrollador de software embebido', en: 'Embedded software developer' },
+    place: { es: 'PROETI · máquinas de ensayo de materiales', en: 'PROETI · materials testing machines' },
+    description: {
+      es: 'El sistema de control de las máquinas de ensayo de materiales (compresión, tracción, CBR): el firmware del microcontrolador, el servicio en C que gobierna la máquina sobre Linux embebido en ARM y la interfaz del equipo. Lo de bajo nivel de 42, cada día.',
+      en: 'The control system of materials testing machines (compression, tension, CBR): the microcontroller firmware, the C service that drives the machine on embedded ARM Linux, and the machine interface. 42-style low-level work, every day.',
+    },
+    tags: ['C', 'Linux embebido', 'ARM', 'Firmware'],
+    current: true,
+  },
+  {
     period: { es: '2026', en: '2026' },
+    backdrop: { es: 'Hoy', en: 'Now' },
     kind: 'work',
     title: { es: 'Volmer Studio', en: 'Volmer Studio' },
     place: { es: 'Webs y apps a medida', en: 'Custom websites and apps' },
@@ -123,19 +137,6 @@ export const milestones: Milestone[] = [
       en: 'Volmer Tech becomes Volmer Studio: custom websites and apps for businesses, 14 five-star Google reviews and a dedicated portal where each client follows their project, invoices and support.',
     },
     link: { href: 'https://volmer.es', label: { es: 'volmer.es', en: 'volmer.es' } },
-    current: true,
-  },
-  {
-    // TODO: falta el nombre de la empresa, el puesto exacto y la fecha de inicio.
-    period: { es: 'Hoy', en: 'Today' },
-    backdrop: { es: 'Hoy', en: 'Now' },
-    kind: 'work',
-    title: { es: 'Desarrollador de software embebido', en: 'Embedded software developer' },
-    place: { es: 'Robótica', en: 'Robotics' },
-    description: {
-      es: 'Software que corre en el propio hardware de las máquinas. El salto natural desde los proyectos de bajo nivel de 42.',
-      en: "Software that runs on the machines' own hardware. The natural next step from 42's low-level projects.",
-    },
     current: true,
   },
 ];
