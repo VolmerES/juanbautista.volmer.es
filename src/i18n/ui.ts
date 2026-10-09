@@ -34,7 +34,7 @@ export const ui = {
     "home.wuri": "3.ª universidad más innovadora del mundo",
     "home.wuriSource": "ranking WURI, 2025 y 2026",
     "home.lead":
-      "Desarrollador de software formado en 42 Madrid. Hago webs y apps a medida en Volmer Studio y software embebido para robótica. Y, por gusto, todo lo que cabe en esta libreta: un shell de Unix, un servidor IRC, un motor 3D.",
+      "Desarrollador de software formado en 42 Madrid. Hago webs y apps a medida en Volmer Studio y software embebido en PROETI, para máquinas de ensayo de materiales. Y, por gusto, todo lo que cabe en esta libreta: un shell de Unix, un servidor IRC, un motor 3D.",
     "home.note":
       "El trabajo para clientes está en Volmer Studio, que es otra web. Aquí está lo que hago por mi cuenta y lo que aprendí en 42.",
     "home.studioLink": "Ver mi trabajo profesional",
@@ -91,7 +91,7 @@ export const ui = {
     "home.wuri": "World's 3rd most innovative university",
     "home.wuriSource": "WURI ranking, 2025 and 2026",
     "home.lead":
-      "Software developer trained at 42 Madrid. I build custom websites and apps at Volmer Studio and embedded software for robotics. And, for fun, everything that fits in this notebook: a Unix shell, an IRC server, a 3D engine.",
+      "Software developer trained at 42 Madrid. I build custom websites and apps at Volmer Studio and embedded software at PROETI, for materials testing machines. And, for fun, everything that fits in this notebook: a Unix shell, an IRC server, a 3D engine.",
     "home.note":
       "Client work lives at Volmer Studio, which is a different site. This one is what I build on my own and what I learned at 42.",
     "home.studioLink": "See my professional work",
