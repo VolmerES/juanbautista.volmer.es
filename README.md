@@ -43,15 +43,15 @@ es como se evalúan de verdad en la escuela. Los tokens están en
 
 ## Despliegue
 
-Cada push a `main` compila y sube `dist/` por FTP a
-`domains/juandelorme-portfolio.volmer.es/public_html` en Hostinger
-(`.github/workflows/deploy.yml`). Necesita tres secretos en GitHub:
-`FTP_SERVER`, `FTP_USERNAME` y `FTP_PASSWORD`, de una cuenta FTP cuya raíz sea
-ese `public_html`.
+Cada push a `main` compila la web y deja `dist/` en la rama `hostinger`
+(`.github/workflows/deploy.yml`, sin secretos). En Hostinger, el sitio
+`juandelorme-portfolio.volmer.es` se publica a partir de esa rama.
 
-Sin `dangerous-clean-slate`: la acción guarda en el servidor qué subió la vez
-anterior y borra solo eso. Vaciar la carpeta entera se llevaría por delante
-cualquier cosa que viva allí y no salga de este repo.
+Para que se despliegue solo en cada push, la app de Hostinger en GitHub tiene
+que tener acceso a este repo (GitHub › Settings › Applications › Hostinger ›
+Repository access) y el sitio la auto-implantación de la rama `hostinger`
+activada. Mientras no lo tenga, el compilado se sube a mano: un zip de `dist/`
+con «Deploy static website» de la API de Hostinger.
 
 ## Notas
 
