@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { getLangFromUrl, useTranslations, useRoutes, me } from '../../i18n/ui';
 import { cursusProjects } from '../../data/cursus';
 import GradeMark from '../GradeMark.astro';
+import ExperienceTimeline from '../ExperienceTimeline.astro';
 
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
@@ -18,17 +19,11 @@ const dateLocale = lang === 'es' ? 'es-ES' : 'en-GB';
 // Los últimos evaluados, que son los que dicen dónde estoy ahora.
 const recent = cursusProjects.filter((p) => p.grade).slice(-4).reverse();
 
-const path = [
-    { year: t('home.p1.year'), title: t('home.p1.title'), desc: t('home.p1.desc') },
-    { year: t('home.p2.year'), title: t('home.p2.title'), desc: t('home.p2.desc') },
-    { year: t('home.p3.year'), title: t('home.p3.title'), desc: t('home.p3.desc') },
-];
-
 const labelRows = [
     { key: t('label.name'), value: me.name },
+    { key: t('label.role'), value: t('home.role') },
     { key: t('label.school'), value: me.school },
     { key: t('label.subject'), value: t('home.subject') },
-    { key: t('label.course'), value: t('home.course') },
 ];
 ---
 
@@ -36,7 +31,7 @@ const labelRows = [
 
     <!-- ===== PORTADA: la etiqueta del cuaderno ===== -->
     <section class="pt-14 sm:pt-24 pb-16">
-        <div class="label-box p-6 sm:p-8 max-w-xl mb-10">
+        <div class="label-box relative p-6 sm:p-8 max-w-xl mb-10">
             <p class="font-mono text-[10px] tracking-[0.2em] text-pencil mb-5 uppercase">
                 {me.alias}
             </p>
@@ -52,6 +47,18 @@ const labelRows = [
                     </div>
                 ))}
             </dl>
+
+            <!-- Nota en rojo al margen, como las notas de los proyectos -->
+            <a
+                href={me.wuriRanking}
+                target="_blank"
+                rel="noopener"
+                class="block mt-5 lg:mt-0 lg:absolute lg:-right-6 lg:translate-x-full lg:top-1/2 lg:-translate-y-1/2 lg:w-48 font-mono text-mark -rotate-2 origin-left hover:opacity-80 transition-opacity"
+            >
+                <span class="hidden lg:inline text-lg leading-none">←&nbsp;</span>
+                <span class="text-[13px] font-bold leading-snug">42: {t('home.wuri')}</span>
+                <span class="block text-[10px] text-mark/70 mt-1">{t('home.wuriSource')} ↗</span>
+            </a>
         </div>
 
         <p class="text-lg sm:text-xl leading-relaxed max-w-2xl text-ink mb-6">
@@ -66,22 +73,13 @@ const labelRows = [
         </p>
     </section>
 
-    <!-- ===== TRAYECTORIA ===== -->
-    <section class="py-14 border-t border-rule">
-        <h2 class="text-2xl sm:text-3xl font-bold mb-10">
+    <!-- ===== TRAYECTORIA: experiencia y formación, animada al hacer scroll ===== -->
+    <section class="py-14 border-t border-rule overflow-x-clip">
+        <h2 class="text-2xl sm:text-3xl font-bold mb-3">
             <span class="underline-mark">{t('home.pathTitle')}</span>
         </h2>
-
-        <ol class="notebook-margin pl-6 sm:pl-8 space-y-9">
-            {path.map((step) => (
-                <li class="relative">
-                    <span class="absolute -left-6 sm:-left-8 top-1.5 w-2 h-2 rounded-full bg-mark"></span>
-                    <p class="font-mono text-[11px] uppercase tracking-wider text-mark mb-1.5">{step.year}</p>
-                    <h3 class="text-lg font-bold mb-1.5">{step.title}</h3>
-                    <p class="text-ink-soft leading-relaxed max-w-2xl">{step.desc}</p>
-                </li>
-            ))}
-        </ol>
+        <p class="text-ink-soft max-w-2xl mb-12">{t('home.pathLead')}</p>
+        <ExperienceTimeline />
     </section>
 
     <!-- ===== ÚLTIMOS PROYECTOS DEL CURSUS ===== -->
