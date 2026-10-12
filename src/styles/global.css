@@ -1,46 +1,57 @@
 @import "tailwindcss";
 
 /**
- * Sistema visual: cuaderno cuadriculado.
+ * Sistema visual: cuaderno cuadriculado, de noche.
  *
- * La web comercial (volmer.es) es neón sobre negro. Esta es su opuesta a
- * propósito: papel claro, tinta de bolígrafo y anotaciones en rojo, como el
- * cuaderno de un estudiante. 42 es una escuela, así que el material de partida
- * es el papel corregido, no la terminal.
+ * Sigue siendo el cuaderno de un estudiante de 42 —cuadrícula, margen, notas
+ * del corrector, cintas, sellos—, pero en negro y con las tintas de la marca
+ * Volmer: el rojo del corrector es el rosa neón y el bolígrafo azul, el cian.
+ * Las tipografías también son las de volmer.es (Outfit, Geist y Geist Mono),
+ * servidas desde el propio dominio.
  */
 @theme {
-  /* Papel */
-  --color-paper: #fafbfc;
-  --color-paper-deep: #f1f4f8;
-  --color-grid: #e1e8f0;
-  --color-rule: #d5dde7;
+  /* Papel: negro, con la cuadrícula apenas marcada */
+  --color-paper: #0a0a0c;
+  --color-paper-deep: #131318;
+  --color-grid: rgba(255, 255, 255, 0.035);
+  --color-rule: rgba(255, 255, 255, 0.1);
 
-  /* Tintas */
-  --color-ink: #17233a; /* bolígrafo azul-negro, no negro puro */
-  --color-ink-soft: #55637d;
-  --color-pencil: #8a97ab;
+  /* Tintas claras */
+  --color-ink: #eceef3;
+  --color-ink-soft: #a6aebe;
+  --color-pencil: #6d7588;
 
-  /* Bolígrafo rojo del corrector: reservado para notas y aciertos */
-  --color-mark: #d63a2f;
-  --color-mark-soft: #fbeae8;
+  /* Corrector: rosa neón, reservado para notas y aciertos */
+  --color-mark: #ff2a6d;
+  --color-mark-soft: rgba(255, 42, 109, 0.14);
 
-  /* Bolígrafo azul: enlaces y subrayados */
-  --color-pen: #2c5fbf;
+  /* Bolígrafo: cian, enlaces y subrayados */
+  --color-pen: #05d9e8;
 
-  --font-display: "Archivo", system-ui, sans-serif;
-  --font-body: "Source Sans 3", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Ramas de la trayectoria */
+  --color-lane-42: #05d9e8;
+  --color-lane-studio: #ff2a6d;
+  --color-lane-projects: #facc15;
+  --color-lane-proeti: #a78bfa;
+
+  --font-display: "Outfit Variable", "Outfit", system-ui, sans-serif;
+  --font-body: "Geist Variable", "Geist", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
 }
 
-/* La cuadrícula de 24px es el fondo del sitio entero. */
+/* La cuadrícula de 24px es el fondo del sitio entero, con un brillo morado
+   arriba, como el de volmer.es. */
 body {
   background-color: var(--color-paper);
-  background-image: linear-gradient(
-      var(--color-grid) 1px,
-      transparent 1px
+  background-image: radial-gradient(
+      ellipse 70% 45% at 15% -5%,
+      rgba(110, 40, 190, 0.22),
+      transparent 70%
     ),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background-repeat: no-repeat, repeat, repeat;
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 17px;
@@ -100,9 +111,9 @@ button:focus-visible {
 
 /* Etiqueta de cuaderno: el rectángulo impreso de la portada. */
 .label-box {
-  border: 1.5px solid var(--color-ink);
-  background: var(--color-paper);
-  box-shadow: 3px 3px 0 var(--color-rule);
+  border: 1.5px solid color-mix(in srgb, var(--color-ink) 70%, transparent);
+  background: var(--color-paper-deep);
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--color-pen) 55%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
