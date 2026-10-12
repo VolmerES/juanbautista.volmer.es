@@ -1,20 +1,21 @@
 ---
 /**
- * Trayectoria animada, en la línea de «Nuestra historia» de mesetair-web pero
- * con el lenguaje del cuaderno:
+ * Trayectoria como un `git log --graph`: de la rama `main` salen ramas que
+ * avanzan a la vez (42 Madrid, Volmer Studio, proyectos, PROETI), porque casi
+ * nunca he hecho una sola cosa. 42 se fusiona de vuelta al terminar; las demás
+ * siguen abiertas y al final se ven corriendo en paralelo.
  *
- * - La línea es un trazo de lápiz que se va repasando en rojo al hacer scroll,
- *   y un bolígrafo baja por ella escribiendo.
- * - Cada hito es un papel pegado con cinta que entra al llegar a pantalla, y su
- *   punto se marca con un ✓ de corrector.
- * - Los años grandes del fondo se mueven a otra velocidad (parallax).
+ * Del cuaderno se queda lo esencial: la línea principal es un trazo de lápiz,
+ * cada hito se marca con el ✓ del corrector, los papeles llevan su cinta y lo
+ * actual, su sello. Los años grandes del fondo van en parallax.
  *
- * Primero para móvil: una columna con la línea a la izquierda. A partir de md
- * los hitos alternan a ambos lados de una línea central y el año ocupa el hueco
- * del lado contrario. Con «reducir movimiento» todo aparece quieto y entero.
+ * El gráfico se dibuja fila a fila: cada hito sabe qué ramas pasan por él y si
+ * en él nace o se cierra alguna, así que las líneas se adaptan solas al alto de
+ * cada tarjeta. Al hacer scroll, cada fila traza su tramo al entrar. Con
+ * «reducir movimiento» o sin JavaScript, todo aparece quieto y entero.
  */
 import { getLangFromUrl } from '../i18n/ui';
-import { milestones, type MilestoneKind } from '../data/experience';
+import { milestones, lanes, type Lane, type MilestoneKind } from '../data/experience';
 
 const lang = getLangFromUrl(Astro.url);
 
@@ -23,155 +24,322 @@ const kindLabel: Record<MilestoneKind, { es: string; en: string }> = {
     study: { es: 'Formación', en: 'Education' },
     work: { es: 'Trabajo', en: 'Work' },
     project: { es: 'Proyecto', en: 'Project' },
+    award: { es: 'Premio', en: 'Award' },
 };
 const nowLabel = lang === 'es' ? 'Ahora' : 'Now';
+const tailLabel = lang === 'es' ? 'Hoy, todo a la vez:' : 'Today, all at once:';
 
 const text = (value: string | { es: string; en: string }) => (typeof value === 'string' ? value : value[lang]);
 const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/en${href}` : href);
+const laneOf = (id: string) => lanes.find((l) => l.id === id)!;
+
+// ---- Dónde nace y dónde acaba cada rama ----
+const span = new Map<string, { first: number; last: number }>();
+milestones.forEach((m, i) => {
+    const s = span.get(m.lane);
+    span.set(m.lane, s ? { first: s.first, last: i } : { first: i, last: i });
+});
+const isOpenAt = (lane: Lane, row: number) => {
+    if (lane.id === 'main') return true;
+    const s = span.get(lane.id);
+    if (!s || row < s.first) return false;
+    return !lane.closes || row <= s.last;
+};
+
+type Segment = 'full' | 'from-node' | 'to-node';
+const rowGraph = (row: number) => {
+    const segments: { lane: Lane; type: Segment }[] = [];
+    const forks: Lane[] = [];
+    const merges: Lane[] = [];
+    for (const lane of lanes) {
+        if (!isOpenAt(lane, row)) continue;
+        const s = span.get(lane.id);
+        const starts = lane.id !== 'main' && s?.first === row;
+        const ends = lane.closes && s?.last === row;
+        if (starts) forks.push(lane);
+        if (ends) merges.push(lane);
+        segments.push({ lane, type: starts ? 'from-node' : ends ? 'to-node' : 'full' });
+    }
+    return { segments, forks, merges };
+};
+const openLanes = lanes.filter((l) => l.id !== 'main' && isOpenAt(l, milestones.length));
+
+// ---- Curvas de las bifurcaciones y fusiones, en píxeles ----
+// Dos geometrías: móvil (columnas de 16 px) y desde md (24 px). Tienen que
+// coincidir con --xp-col y --xp-x0 del CSS.
+const NODE_Y = 28;
+const LEAD = 30; // la bifurcación arranca este tramo antes de la fila
+const geometry = { sm: { col: 16, x0: 10 }, md: { col: 24, x0: 14 } };
+const curveBox = { height: LEAD + NODE_Y + 44 };
+const x = (g: { col: number; x0: number }, column: number) => g.x0 + column * g.col;
+const forkPath = (g: { col: number; x0: number }, lane: Lane) => {
+    const x0 = x(g, 0), x1 = x(g, lane.column), y1 = LEAD + NODE_Y;
+    return `M ${x0} 0 C ${x0} ${y1 * 0.55}, ${x1} ${y1 * 0.45}, ${x1} ${y1}`;
+};
+const mergePath = (g: { col: number; x0: number }, lane: Lane) => {
+    const x0 = x(g, 0), x1 = x(g, lane.column), y0 = LEAD + NODE_Y;
+    return `M ${x1} ${y0} C ${x1} ${y0 + 24}, ${x0} ${y0 + 18}, ${x0} ${y0 + 42}`;
+};
 ---
 
 <div class="xp" data-xp>
-    <div class="xp-line" aria-hidden="true">
-        <div class="xp-ink"></div>
-        <svg class="xp-pen" viewBox="0 0 24 64" width="20" height="54">
-            <rect x="7" y="0" width="10" height="34" rx="3" fill="var(--color-ink)" />
-            <rect x="15" y="4" width="3" height="18" rx="1.5" fill="var(--color-pencil)" />
-            <rect x="7" y="31" width="10" height="11" rx="1.5" fill="var(--color-pen)" />
-            <path d="M7 42 H17 L12.6 60 H11.4 Z" fill="#cfd6e0" />
-            <circle cx="12" cy="60.5" r="1.6" fill="var(--color-mark)" />
-        </svg>
-    </div>
+    <!-- Leyenda: las ramas -->
+    <ul class="xp-legend" aria-label={lang === 'es' ? 'Ramas' : 'Branches'}>
+        {lanes.map((lane) => (
+            <li style={`--lane: ${lane.color}`}><span class="xp-legend-dot" aria-hidden="true"></span>{lane.name[lang]}</li>
+        ))}
+    </ul>
 
     <ol class="xp-items">
-        {milestones.map((m, i) => (
-            <li class:list={['xp-item', i % 2 === 0 ? 'xp-left' : 'xp-right']} style={`--tilt: ${i % 2 === 0 ? '-0.7deg' : '0.6deg'}`} data-xp-item>
-                <span class="xp-dot" aria-hidden="true">
-                    <svg viewBox="0 0 20 20"><path d="M5 10.5 L8.5 14 L15 6.5" /></svg>
-                </span>
+        {milestones.map((m, i) => {
+            const lane = laneOf(m.lane);
+            const { segments, forks, merges } = rowGraph(i);
+            return (
+                <li class="xp-row" style={`--lane: ${lane.color}; --c: ${lane.column}`} data-xp-item>
+                    <div class="xp-graph" aria-hidden="true">
+                        {segments.map(({ lane: l, type }) => (
+                            <span class:list={['xp-seg', `xp-seg--${type}`, { 'xp-seg--main': l.id === 'main' }]} style={`--c: ${l.column}; --seg: ${l.color}`}></span>
+                        ))}
+                        {(forks.length > 0 || merges.length > 0) && (Object.entries(geometry) as [string, { col: number; x0: number }][]).map(([size, g]) => (
+                            <svg class={`xp-curves xp-curves--${size}`} width={x(g, 3) + g.x0} height={curveBox.height} viewBox={`0 0 ${x(g, 3) + g.x0} ${curveBox.height}`}>
+                                {forks.map((l) => <path d={forkPath(g, l)} pathLength="1" style={`stroke: ${l.color}; color: ${l.color}`} />)}
+                                {merges.map((l) => <path d={mergePath(g, l)} pathLength="1" style={`stroke: ${l.color}; color: ${l.color}`} class="xp-merge" />)}
+                            </svg>
+                        ))}
+                        <span class="xp-dot">
+                            <svg viewBox="0 0 20 20"><path d="M5 10.5 L8.5 14 L15 6.5" /></svg>
+                        </span>
+                    </div>
 
-                {m.backdrop && (
-                    <span class="xp-backdrop" aria-hidden="true" data-xp-parallax>{text(m.backdrop)}</span>
-                )}
+                    <div class="xp-body">
+                        {m.backdrop && (
+                            <span class="xp-backdrop" aria-hidden="true" data-xp-parallax>{text(m.backdrop)}</span>
+                        )}
 
-                <article class:list={['xp-card', { 'xp-card--current': m.current }]}>
-                    <span class="xp-tape" aria-hidden="true"></span>
-                    {m.current && <span class="xp-stamp" aria-hidden="true">{nowLabel}</span>}
+                        <article class:list={['xp-card', { 'xp-card--current': m.current }]}>
+                            <span class="xp-tape" aria-hidden="true"></span>
+                            {m.current && <span class="xp-stamp" aria-hidden="true">{nowLabel}</span>}
 
-                    <p class="xp-meta">
-                        <span class="xp-period">{m.period[lang]}</span>
-                        <span class={`xp-kind xp-kind--${m.kind}`}>{kindLabel[m.kind][lang]}</span>
-                    </p>
-                    <h3 class="xp-title">{m.title[lang]}</h3>
-                    {m.place && <p class="xp-place">{m.place[lang]}</p>}
-                    <p class="xp-desc">{m.description[lang]}</p>
+                            <p class="xp-meta">
+                                <span class="xp-period">{m.period[lang]}</span>
+                                <span class="xp-kind">{kindLabel[m.kind][lang]}</span>
+                                <span class="xp-branch" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3v12M18 9a9 9 0 0 1-9 9" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /></svg>{lane.name[lang]}</span>
+                            </p>
+                            <h3 class="xp-title">{m.title[lang]}</h3>
+                            {m.place && <p class="xp-place">{m.place[lang]}</p>}
+                            <p class="xp-desc">{m.description[lang]}</p>
 
-                    {(m.tags || m.link) && (
-                        <div class="xp-foot">
-                            {m.tags && <p class="xp-tags">{m.tags.join(' · ')}</p>}
-                            {m.link && (
-                                <a
-                                    class="xp-link"
-                                    href={localHref(m.link.href)}
-                                    {...(m.link.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
-                                >
-                                    {m.link.label[lang]} {m.link.href.startsWith('http') ? '↗' : '→'}
-                                </a>
+                            {(m.tags || m.link) && (
+                                <div class="xp-foot">
+                                    {m.tags && <p class="xp-tags">{m.tags.join(' · ')}</p>}
+                                    {m.link && (
+                                        <a
+                                            class="xp-link"
+                                            href={localHref(m.link.href)}
+                                            {...(m.link.href.startsWith('http') ? { target: '_blank', rel: 'noopener' } : {})}
+                                        >
+                                            {m.link.label[lang]} {m.link.href.startsWith('http') ? '↗' : '→'}
+                                        </a>
+                                    )}
+                                </div>
                             )}
-                        </div>
-                    )}
-                </article>
-            </li>
-        ))}
+                        </article>
+                    </div>
+                </li>
+            );
+        })}
+
+        <!-- Lo que sigue abierto hoy: varias ramas en paralelo que se pierden hacia abajo -->
+        <li class="xp-row xp-row--tail" data-xp-item>
+            <div class="xp-graph" aria-hidden="true">
+                <span class="xp-seg xp-seg--tail xp-seg--main" style="--c: 0; --seg: var(--color-pencil)"></span>
+                {openLanes.map((l) => (
+                    <span class="xp-seg xp-seg--tail" style={`--c: ${l.column}; --seg: ${l.color}`}></span>
+                ))}
+            </div>
+            <div class="xp-body xp-tail">
+                <p class="xp-tail-label">{tailLabel}</p>
+                <ul class="xp-tail-lanes">
+                    {openLanes.map((l) => (
+                        <li style={`--lane: ${l.color}`}><span class="xp-legend-dot" aria-hidden="true"></span>{l.name[lang]}</li>
+                    ))}
+                </ul>
+            </div>
+        </li>
     </ol>
 </div>
 
 <style>
-    /* ---------------- Móvil: una columna, línea a la izquierda ---------------- */
     .xp {
-        --xp-gutter: 2.4rem;
-        --xp-line-x: 0.7rem;
-        --xp-progress: 0;
-        --xp-pen-y: 0px;
+        /* Geometría del gráfico (la misma que la del frontmatter) */
+        --xp-col: 16px;
+        --xp-x0: 10px;
+        --xp-node-y: 28px;
+        --xp-lead: 30px;
+        --xp-graph-w: calc(var(--xp-x0) * 2 + var(--xp-col) * 3);
         position: relative;
-        padding: 0.5rem 0 1rem var(--xp-gutter);
+        padding: 0.5rem 0 1rem;
+    }
+    @media (min-width: 768px) {
+        .xp {
+            --xp-col: 24px;
+            --xp-x0: 14px;
+        }
     }
 
-    .xp-line {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: var(--xp-line-x);
-        width: 2px;
-        /* Trazo de lápiz discontinuo: lo que queda por recorrer */
-        background: repeating-linear-gradient(to bottom, var(--color-pencil) 0 6px, transparent 6px 11px);
-        opacity: 0.9;
+    /* ---------------- Leyenda ---------------- */
+    .xp-legend,
+    .xp-tail-lanes {
+        list-style: none;
+        margin: 0 0 2rem;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem 1.1rem;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-ink-soft);
     }
-    .xp-ink {
-        position: absolute;
-        inset: 0;
-        background: var(--color-mark);
-        border-radius: 2px;
-        transform-origin: top;
-        transform: scaleY(var(--xp-progress));
+    .xp-legend li,
+    .xp-tail-lanes li {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
     }
-    .xp-pen {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        transform-origin: 50% 100%;
-        transform: translate(-50%, calc(var(--xp-pen-y) - 100%)) rotate(14deg);
-        filter: drop-shadow(0 3px 3px rgba(23, 35, 58, 0.18));
-        pointer-events: none;
+    .xp-legend-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--lane);
+        box-shadow: 0 0 10px color-mix(in srgb, var(--lane) 60%, transparent);
     }
 
-    /* Un solo contexto de apilado para toda la lista: así cualquier tarjeta
-       queda por encima de cualquier año de fondo, también del hito vecino. */
+    /* ---------------- Filas: gráfico a la izquierda, papel a la derecha ---------------- */
     .xp-items {
         isolation: isolate;
         list-style: none;
         margin: 0;
         padding: 0;
-        display: grid;
-        gap: 2.6rem;
     }
-
-    .xp-item {
+    .xp-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: var(--xp-graph-w) minmax(0, 1fr);
+        column-gap: 0.85rem;
+    }
+    .xp-graph {
         position: relative;
     }
+    .xp-body {
+        position: relative;
+        padding-bottom: 2.4rem;
+        min-width: 0;
+    }
 
-    /* El punto de la línea: un círculo de lápiz que se corrige con un ✓ rojo */
+    /* Tramo de cada rama dentro de la fila. Se traza hacia abajo al entrar. */
+    .xp-seg {
+        position: absolute;
+        left: calc(var(--xp-x0) + var(--c) * var(--xp-col) - 1px);
+        width: 2px;
+        top: 0;
+        bottom: 0;
+        border-radius: 2px;
+        background: var(--seg);
+        box-shadow: 0 0 8px color-mix(in srgb, var(--seg) 45%, transparent);
+        transform-origin: top;
+        transform: scaleY(0);
+        transition: transform 0.75s cubic-bezier(0.3, 0.7, 0.3, 1);
+    }
+    /* main es el trazo de lápiz del cuaderno: discontinuo y sin brillo */
+    .xp-seg--main {
+        background: repeating-linear-gradient(to bottom, var(--seg) 0 6px, transparent 6px 11px);
+        box-shadow: none;
+    }
+    .xp-seg--from-node {
+        top: var(--xp-node-y);
+    }
+    .xp-seg--to-node {
+        bottom: auto;
+        height: var(--xp-node-y);
+    }
+    .xp-seg--tail {
+        bottom: auto;
+        height: 5.5rem;
+        -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent);
+        mask-image: linear-gradient(to bottom, black 30%, transparent);
+    }
+    .xp-row.is-visible .xp-seg {
+        transform: scaleY(1);
+    }
+
+    /* Bifurcaciones y fusiones */
+    .xp-curves {
+        position: absolute;
+        left: 0;
+        top: calc(var(--xp-lead) * -1);
+        overflow: visible;
+        pointer-events: none;
+    }
+    .xp-curves path {
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        filter: drop-shadow(0 0 4px currentColor);
+        transition: stroke-dashoffset 0.6s ease;
+    }
+    .xp-curves .xp-merge {
+        transition-delay: 0.45s;
+    }
+    .xp-row.is-visible .xp-curves path {
+        stroke-dashoffset: 0;
+    }
+    .xp-curves--md {
+        display: none;
+    }
+    @media (min-width: 768px) {
+        .xp-curves--sm {
+            display: none;
+        }
+        .xp-curves--md {
+            display: block;
+        }
+    }
+
+    /* El punto del hito: un círculo que el corrector marca con un ✓ */
     .xp-dot {
         position: absolute;
-        top: 1.15rem;
-        left: calc(var(--xp-line-x) - var(--xp-gutter) + 1px);
+        z-index: 2;
+        top: calc(var(--xp-node-y) - 11px);
+        left: calc(var(--xp-x0) + var(--c) * var(--xp-col) - 11px);
         width: 22px;
         height: 22px;
-        transform: translateX(-50%);
         border-radius: 50%;
         background: var(--color-paper);
-        border: 2px solid var(--color-pencil);
+        border: 2px solid color-mix(in srgb, var(--lane) 55%, var(--color-pencil));
         display: grid;
         place-items: center;
-        z-index: 2;
-        transition: border-color 0.4s ease, background-color 0.4s ease;
+        transition: border-color 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
     }
     .xp-dot svg {
-        width: 14px;
-        height: 14px;
+        width: 13px;
+        height: 13px;
         fill: none;
-        stroke: var(--color-mark);
-        stroke-width: 2.6;
+        stroke: var(--lane);
+        stroke-width: 2.8;
         stroke-linecap: round;
         stroke-linejoin: round;
         stroke-dasharray: 20;
         stroke-dashoffset: 20;
-        transition: stroke-dashoffset 0.5s ease 0.25s;
+        transition: stroke-dashoffset 0.5s ease 0.35s;
     }
-    .xp-item.is-visible .xp-dot {
-        border-color: var(--color-mark);
-        background: var(--color-mark-soft);
+    .xp-row.is-visible .xp-dot {
+        border-color: var(--lane);
+        background: color-mix(in srgb, var(--lane) 16%, var(--color-paper));
+        box-shadow: 0 0 14px color-mix(in srgb, var(--lane) 45%, transparent);
     }
-    .xp-item.is-visible .xp-dot svg {
+    .xp-row.is-visible .xp-dot svg {
         stroke-dashoffset: 0;
     }
 
@@ -179,50 +347,56 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
     .xp-backdrop {
         position: absolute;
         z-index: 0;
-        top: -2.2rem;
+        top: -1.9rem;
         right: -0.25rem;
         font-family: var(--font-display);
         font-weight: 800;
-        font-size: clamp(4.2rem, 24vw, 6.5rem);
+        font-size: clamp(3.6rem, 20vw, 6rem);
         line-height: 1;
         letter-spacing: -0.04em;
         color: transparent;
-        -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-pencil) 45%, transparent);
+        -webkit-text-stroke: 1.5px color-mix(in srgb, var(--lane) 30%, transparent);
         user-select: none;
         pointer-events: none;
         will-change: transform;
     }
 
-    /* El papel pegado */
+    /* El papel: tarjeta oscura con el canto del color de su rama */
     .xp-card {
         position: relative;
         z-index: 1;
-        background: #fff;
+        background: color-mix(in srgb, var(--color-paper-deep) 94%, transparent);
         border: 1px solid var(--color-rule);
-        padding: 1.25rem 1.15rem 1.1rem;
-        box-shadow: 0 1px 0 var(--color-rule), 0 10px 24px -14px rgba(23, 35, 58, 0.25);
+        border-left: 3px solid var(--lane);
+        border-radius: 12px;
+        padding: 1.15rem 1.05rem 1rem;
+        box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
         opacity: 0;
-        transform: translateY(28px) rotate(var(--tilt));
-        transition: opacity 0.7s ease, transform 0.8s cubic-bezier(0.2, 0.75, 0.2, 1);
+        transform: translateY(26px);
+        transition: opacity 0.7s ease 0.1s, transform 0.8s cubic-bezier(0.2, 0.75, 0.2, 1) 0.1s, border-color 0.3s ease;
     }
-    .xp-item.is-visible .xp-card {
+    .xp-row.is-visible .xp-card {
         opacity: 1;
-        transform: translateY(0) rotate(var(--tilt));
+        transform: none;
+    }
+    .xp-card:hover {
+        border-color: color-mix(in srgb, var(--lane) 45%, var(--color-rule));
+        border-left-color: var(--lane);
     }
     .xp-card--current {
-        border-left: 3px solid var(--color-mark);
+        background: color-mix(in srgb, var(--lane) 7%, var(--color-paper-deep));
     }
 
     .xp-tape {
         position: absolute;
-        top: -10px;
-        left: 1.4rem;
-        width: 74px;
-        height: 20px;
-        background: color-mix(in srgb, var(--color-mark-soft) 85%, white);
-        border: 1px solid color-mix(in srgb, var(--color-mark) 12%, transparent);
+        top: -9px;
+        left: 1.3rem;
+        width: 64px;
+        height: 18px;
+        background: color-mix(in srgb, var(--lane) 22%, transparent);
+        border: 1px solid color-mix(in srgb, var(--lane) 30%, transparent);
         transform: rotate(-3deg);
-        opacity: 0.95;
+        backdrop-filter: blur(2px);
     }
 
     /* Sello «Ahora», como el de un corrector */
@@ -235,49 +409,63 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
         font-weight: 700;
         letter-spacing: 0.18em;
         text-transform: uppercase;
-        color: var(--color-mark);
-        border: 2px solid var(--color-mark);
+        color: var(--lane);
+        border: 2px solid var(--lane);
         border-radius: 4px;
         padding: 2px 6px;
         transform: rotate(8deg) scale(1.6);
         opacity: 0;
-        transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) 0.55s, opacity 0.2s ease 0.55s;
+        transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) 0.65s, opacity 0.2s ease 0.65s;
     }
-    .xp-item.is-visible .xp-stamp {
+    .xp-row.is-visible .xp-stamp {
         transform: rotate(8deg) scale(1);
-        opacity: 0.9;
+        opacity: 0.95;
     }
 
     .xp-meta {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        gap: 0.35rem 0.7rem;
-        margin: 0 4.5rem 0.55rem 0;
+        gap: 0.35rem 0.65rem;
+        margin: 0 4.2rem 0.55rem 0;
         font-family: var(--font-mono);
         font-size: 11px;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
     }
     .xp-period {
-        color: var(--color-mark);
+        color: var(--lane);
         font-weight: 700;
     }
     .xp-kind {
         padding: 1px 7px;
         border-radius: 999px;
-        border: 1px solid currentColor;
+        border: 1px solid color-mix(in srgb, var(--lane) 55%, transparent);
+        color: color-mix(in srgb, var(--lane) 80%, var(--color-ink));
         font-size: 10px;
     }
-    .xp-kind--work { color: var(--color-mark); }
-    .xp-kind--study { color: var(--color-pen); }
-    .xp-kind--project { color: #2f855a; }
-    .xp-kind--origin { color: var(--color-pencil); }
+    .xp-branch {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        text-transform: none;
+        letter-spacing: 0;
+        color: var(--color-pencil);
+    }
+    .xp-branch svg {
+        width: 12px;
+        height: 12px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+    }
 
     .xp-title {
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         font-weight: 700;
         margin: 0 0 0.2rem;
+        color: var(--color-ink);
     }
     .xp-place {
         margin: 0 0 0.55rem;
@@ -288,7 +476,7 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
     .xp-desc {
         margin: 0;
         color: var(--color-ink-soft);
-        font-size: 0.97rem;
+        font-size: 0.96rem;
         line-height: 1.6;
     }
     .xp-foot {
@@ -321,81 +509,72 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
         text-decoration-color: var(--color-pen);
     }
 
-    /* ---------------- md+: línea central y hitos alternos ---------------- */
+    /* La cola: lo que sigue abierto */
+    .xp-tail {
+        padding: 1.4rem 0 0;
+        opacity: 0;
+        transition: opacity 0.6s ease 0.4s;
+    }
+    .xp-row--tail.is-visible .xp-tail {
+        opacity: 1;
+    }
+    .xp-tail-label {
+        margin: 0 0 0.6rem;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--color-ink);
+    }
+    .xp-tail-lanes {
+        margin: 0;
+        color: var(--color-ink);
+    }
+
+    /* ---------------- md+: más aire y el año en el hueco de la derecha ---------------- */
     @media (min-width: 768px) {
-        .xp {
-            --xp-gutter: 0px;
-            --xp-line-x: 50%;
-            padding: 1rem 0 2rem;
+        .xp-row {
+            column-gap: 1.6rem;
         }
-        .xp-line {
-            transform: translateX(-1px);
-        }
-        .xp-items {
-            gap: 1.5rem;
-        }
-        .xp-item {
-            width: 50%;
-        }
-        .xp-left {
-            padding-right: 3.2rem;
-        }
-        .xp-right {
-            margin-left: 50%;
-            padding-left: 3.2rem;
-        }
-
-        .xp-left .xp-dot {
-            left: auto;
-            right: 0;
-            transform: translateX(50%);
-        }
-        .xp-right .xp-dot {
-            left: 0;
-            transform: translateX(-50%);
-        }
-
-        /* El año va en el hueco del otro lado de la línea */
-        .xp-backdrop {
-            top: 50%;
-            right: auto;
-            margin-top: -0.55em;
-            font-size: clamp(5rem, 9vw, 8.5rem);
-        }
-        .xp-left .xp-backdrop {
-            left: calc(100% + 3.2rem);
-        }
-        .xp-right .xp-backdrop {
-            right: calc(100% + 3.2rem);
-        }
-
-        .xp-left .xp-card {
-            transform: translateX(-46px) rotate(var(--tilt));
-        }
-        .xp-right .xp-card {
-            transform: translateX(46px) rotate(var(--tilt));
-        }
-        .xp-item.is-visible .xp-card {
-            transform: translateX(0) rotate(var(--tilt));
+        .xp-body {
+            padding-bottom: 2.8rem;
         }
         .xp-card {
-            padding: 1.5rem 1.6rem 1.3rem;
+            max-width: 40rem;
+            padding: 1.4rem 1.6rem 1.25rem;
         }
         .xp-title {
             font-size: 1.3rem;
+        }
+        .xp-backdrop {
+            top: -2.6rem;
+            right: auto;
+            left: calc(min(40rem, 100%) - 13rem);
+            font-size: 5.5rem;
+        }
+    }
+    /* Con sitio de sobra, el año va en el hueco a la derecha del papel */
+    @media (min-width: 1280px) {
+        .xp-card {
+            max-width: 34rem;
+        }
+        .xp-backdrop {
+            top: 50%;
+            left: calc(34rem + 2rem);
+            margin-top: -0.6em;
+            font-size: 7rem;
         }
     }
 
     /* ---------------- Sin animaciones si se pide ---------------- */
     @media (prefers-reduced-motion: reduce) {
+        .xp-seg,
+        .xp-curves path,
         .xp-card,
         .xp-stamp,
         .xp-dot,
-        .xp-dot svg {
+        .xp-dot svg,
+        .xp-tail {
             transition: none;
-        }
-        .xp-pen {
-            display: none;
         }
     }
 </style>
@@ -410,9 +589,8 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
 
         if (reduceMotion || !('IntersectionObserver' in window)) {
             items.forEach((item) => item.classList.add('is-visible'));
-            root.style.setProperty('--xp-progress', '1');
         } else {
-            // Cada hito entra una sola vez, cuando asoma por abajo.
+            // Cada fila traza su tramo una sola vez, cuando asoma por abajo.
             const observer = new IntersectionObserver(
                 (entries) => {
                     for (const entry of entries) {
@@ -425,27 +603,21 @@ const localHref = (href: string) => (href.startsWith('/') && lang === 'en' ? `/e
             );
             items.forEach((item) => observer.observe(item));
 
-            // Tinta, bolígrafo y parallax: una lectura de layout por frame como mucho.
+            // Parallax de los años: una lectura de layout por frame como mucho.
             let ticking = false;
             const update = () => {
                 ticking = false;
                 const vh = window.innerHeight;
-                const rect = root.getBoundingClientRect();
-                // La tinta llega hasta la altura del 60 % de la pantalla.
-                const progress = Math.min(1, Math.max(0, (vh * 0.6 - rect.top) / rect.height));
-                root.style.setProperty('--xp-progress', progress.toFixed(4));
-                root.style.setProperty('--xp-pen-y', `${(progress * rect.height).toFixed(1)}px`);
-
-                // Menos recorrido en móvil, donde el año va detrás del papel.
                 const factor = window.innerWidth < 768 ? 0.1 : 0.18;
                 const limit = window.innerWidth < 768 ? 40 : 90;
+                const moves: [HTMLElement, number][] = [];
                 backdrops.forEach((el) => {
                     const box = el.parentElement!.getBoundingClientRect();
                     if (box.bottom < -200 || box.top > vh + 200) return;
                     const raw = (box.top + box.height / 2 - vh / 2) * -factor;
-                    const offset = Math.max(-limit, Math.min(limit, raw));
-                    el.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
+                    moves.push([el, Math.max(-limit, Math.min(limit, raw))]);
                 });
+                for (const [el, offset] of moves) el.style.transform = `translate3d(0, ${offset.toFixed(1)}px, 0)`;
             };
             const onScroll = () => {
                 if (ticking) return;

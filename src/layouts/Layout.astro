@@ -1,5 +1,11 @@
 ---
 import '../styles/global.css';
+// Las tipografías de la marca, servidas desde el propio dominio.
+import '@fontsource-variable/outfit';
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
+import outfitLatin from '@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2?url';
+import geistLatin from '@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { getLangFromUrl, getAlternateUrl } from '../i18n/ui';
@@ -31,6 +37,8 @@ const desc = description || defaultDescription;
 <html lang={lang}>
 <head>
     <meta charset="UTF-8" />
+    <meta name="theme-color" content="#0a0a0c" />
+    <meta name="color-scheme" content="dark" />
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
     <meta name="description" content={desc} />
@@ -49,12 +57,8 @@ const desc = description || defaultDescription;
     <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
     <meta name="twitter:card" content="summary" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap"
-        rel="stylesheet"
-    />
+    <link rel="preload" href={outfitLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
 </head>
 <body class="min-h-screen flex flex-col">
     <Header />
