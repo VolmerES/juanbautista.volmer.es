@@ -103,7 +103,7 @@ export const cursusProjects: CursusProject[] = [
     grade: "100/100",
     bonus: false,
     tech: ["C", "Threads", "Mutex"],
-    repo: "https://github.com/VolmerES/Philosophers-2",
+    repo: "https://github.com/VolmerES/Philosophers",
   },
   {
     title: "Minishell",
@@ -147,7 +147,7 @@ export const cursusProjects: CursusProject[] = [
     grade: "80–100/100",
     bonus: false,
     tech: ["C++", "OOP", "STL"],
-    repo: null,
+    repo: "https://github.com/VolmerES/CPPModules00-04",
   },
   {
     title: "Inception",
@@ -158,18 +158,18 @@ export const cursusProjects: CursusProject[] = [
     grade: "100/100",
     bonus: false,
     tech: ["Docker", "Nginx", "MariaDB"],
-    repo: null,
+    repo: "https://github.com/VolmerES/inception",
   },
   {
     title: "ft_irc",
     description: {
-      es: "Un servidor IRC que funciona con clientes reales como irssi. Sockets no bloqueantes y multiplexación de I/O.",
-      en: "An IRC server that works with real clients like irssi. Non-blocking sockets and I/O multiplexing.",
+      es: "Un servidor IRC que funciona con clientes reales como HexChat. Sockets no bloqueantes y multiplexación de I/O.",
+      en: "An IRC server that works with real clients like HexChat. Non-blocking sockets and I/O multiplexing.",
     },
     grade: "100/100",
     bonus: false,
     tech: ["C++", "Sockets", "IRC"],
-    repo: null,
+    repo: "https://github.com/VolmerES/ft_irc",
   },
   {
     title: "Cybersecurity Piscine",
