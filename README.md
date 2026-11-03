@@ -62,3 +62,7 @@ con «Deploy static website» de la API de Hostinger.
 - Español sin prefijo, inglés bajo `/en`. Los slugs se traducen
   (`/proyectos` ↔ `/en/projects`) y el conmutador de idioma los resuelve en
   `getAlternateUrl`.
+
+## Licencia
+
+El código de la web va bajo licencia [MIT](LICENSE). Los textos, fotografías, imágenes y logotipos son © 2026 Juan Bautista Delorme Pinedo, con todos los derechos reservados. Detalle en [LICENSE](LICENSE).

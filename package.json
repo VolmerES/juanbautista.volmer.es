@@ -2,6 +2,7 @@
   "name": "juandelorme-portfolio",
   "type": "module",
   "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
