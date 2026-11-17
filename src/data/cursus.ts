@@ -206,6 +206,17 @@ export interface PersonalProject {
 
 export const personalProjects: PersonalProject[] = [
   {
+    title: "WhatsTerm",
+    description: {
+      es: "WhatsApp en la terminal, como un chat sobrio que pasa por una herramienta de desarrollo más. Si alguien se acerca, Esc lo tapa con una sesión de programación de mentira. Código abierto y se instala con npm.",
+      en: "WhatsApp in the terminal, as a quiet chat that passes for just another dev tool. If someone walks by, Esc covers it with a fake coding session. Open source, installs with npm.",
+    },
+    status: "live",
+    tech: ["Node.js", "React (Ink)", "Baileys"],
+    image: "/whatsterm-preview.png",
+    link: "https://github.com/VolmerES/WhatsTerm",
+  },
+  {
     title: "Movie Swipe",
     description: {
       es: "Decidir qué peli ver en pareja deslizando, como en una app de citas. Cuando hay match, ya tenéis plan.",
