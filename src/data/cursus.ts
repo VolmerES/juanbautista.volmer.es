@@ -208,8 +208,8 @@ export const personalProjects: PersonalProject[] = [
   {
     title: "WhatsTerm",
     description: {
-      es: "WhatsApp en la terminal, como un chat sobrio que pasa por una herramienta de desarrollo más. Si alguien se acerca, Esc lo tapa con una sesión de programación de mentira. Código abierto y se instala con npm.",
-      en: "WhatsApp in the terminal, as a quiet chat that passes for just another dev tool. If someone walks by, Esc covers it with a fake coding session. Open source, installs with npm.",
+      es: "WhatsApp en la terminal: un chat sobrio que se maneja solo con el teclado, con grupos, adjuntos y «escribiendo…». Código abierto y se instala con npm.",
+      en: "WhatsApp in the terminal: a quiet chat you drive entirely from the keyboard, with groups, attachments and typing indicators. Open source, installs with npm.",
     },
     status: "live",
     tech: ["Node.js", "React (Ink)", "Baileys"],
