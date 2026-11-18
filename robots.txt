@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Disallow: /examrank06
+
+Sitemap: https://juandelorme-portfolio.volmer.es/sitemap-index.xml
